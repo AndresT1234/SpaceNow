@@ -8,17 +8,20 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.app.spacenow.data.model.Space
+import com.app.spacenow.ui.theme.AvailableGreen
 import com.app.spacenow.ui.viewmodels.DashboardViewModel
 
 @Composable
@@ -88,24 +91,24 @@ fun SpaceCard(
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.padding(top = 8.dp)
                 )
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 8.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text(
-                        text = "Capacidad: ${space.capacity} personas",
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                    Text(
-                        text = if (space.available) "Disponible" else "Ocupado",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = if (space.available) 
-                            MaterialTheme.colorScheme.primary 
-                        else 
-                            MaterialTheme.colorScheme.error
-                    )
+                Text(
+                    text = "Capacidad: ${space.capacity} personas",
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.padding(top = 8.dp)
+                )
+                if (space.available) {
+                    Surface(
+                        color = AvailableGreen,
+                        shape = MaterialTheme.shapes.small,
+                        modifier = Modifier.padding(top = 8.dp)
+                    ) {
+                        Text(
+                            text = "Disponible",
+                            color = Color.White,
+                            style = MaterialTheme.typography.labelMedium,
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                        )
+                    }
                 }
             }
         }
