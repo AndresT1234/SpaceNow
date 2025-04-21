@@ -26,27 +26,51 @@ class DashboardViewModel : ViewModel() {
                 val mockSpaces = listOf(
                     Space(
                         id = "1",
-                        name = "Sala de Reuniones A",
-                        description = "Espaciosa sala con capacidad para 10 personas",
-                        capacity = 10,
+                        name = "Salón Social",
+                        description = "Amplio espacio para eventos sociales y reuniones",
+                        capacity = 50,
                         available = true,
-                        imageUrl = "https://via.placeholder.com/400x300/2196F3/FFFFFF?text=Sala+A"
+                        imageUrl = "https://via.placeholder.com/400x300/2196F3/FFFFFF?text=Salon+Social"
                     ),
                     Space(
                         id = "2",
-                        name = "Sala de Conferencias",
-                        description = "Sala equipada con proyector y sistema de audio",
+                        name = "Zona BBQ",
+                        description = "Área equipada para asados y reuniones al aire libre",
                         capacity = 20,
                         available = true,
-                        imageUrl = "https://via.placeholder.com/400x300/4CAF50/FFFFFF?text=Sala+B"
+                        imageUrl = "https://via.placeholder.com/400x300/4CAF50/FFFFFF?text=Zona+BBQ"
                     ),
                     Space(
                         id = "3",
-                        name = "Espacio Colaborativo",
-                        description = "Área abierta para trabajo en equipo",
+                        name = "Gimnasio",
+                        description = "Espacio con equipos modernos para ejercicio",
                         capacity = 15,
-                        available = false,
-                        imageUrl = "https://via.placeholder.com/400x300/FFC107/FFFFFF?text=Sala+C"
+                        available = true,
+                        imageUrl = "https://via.placeholder.com/400x300/FFC107/FFFFFF?text=Gimnasio"
+                    ),
+                    Space(
+                        id = "4",
+                        name = "Sauna",
+                        description = "Área de relajación y bienestar",
+                        capacity = 6,
+                        available = true,
+                        imageUrl = "https://via.placeholder.com/400x300/FF5722/FFFFFF?text=Sauna"
+                    ),
+                    Space(
+                        id = "5",
+                        name = "Cancha de Tenis",
+                        description = "Cancha profesional para práctica y competición",
+                        capacity = 4,
+                        available = true,
+                        imageUrl = "https://via.placeholder.com/400x300/9C27B0/FFFFFF?text=Cancha+Tenis"
+                    ),
+                    Space(
+                        id = "6",
+                        name = "Cancha Sintética",
+                        description = "Campo de fútbol con césped artificial",
+                        capacity = 14,
+                        available = true,
+                        imageUrl = "https://via.placeholder.com/400x300/009688/FFFFFF?text=Cancha+Sintetica"
                     )
                 )
                 _spaces.value = mockSpaces
