@@ -3,20 +3,26 @@ package com.app.spacenow.ui.viewmodels
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.app.spacenow.data.model.Space
+import com.app.spacenow.data.model.Reservation
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import java.util.Date
 
 class DashboardViewModel : ViewModel() {
     private val _spaces = MutableStateFlow<List<Space>>(emptyList())
     val spaces: StateFlow<List<Space>> = _spaces.asStateFlow()
+
+    private val _reservations = MutableStateFlow<List<Reservation>>(emptyList())
+    val reservations: StateFlow<List<Reservation>> = _reservations.asStateFlow()
 
     private val _isLoading = MutableStateFlow(false)
     val isLoading = _isLoading.asStateFlow()
 
     init {
         loadMockSpaces()
+        loadMockReservations()
     }
 
     private fun loadMockSpaces() {
@@ -80,6 +86,44 @@ class DashboardViewModel : ViewModel() {
             } finally {
                 _isLoading.value = false
             }
+        }
+    }
+
+    private fun loadMockReservations() {
+        viewModelScope.launch {
+            val mockReservations = listOf(
+                Reservation(
+                    id = "1",
+                    spaceId = "1",
+                    spaceName = "Salón Social",
+                    userId = "current_user",
+                    dateTime = Date(System.currentTimeMillis() + 86400000) // Mañana
+                ),
+                Reservation(
+                    id = "2",
+                    spaceId = "2",
+                    spaceName = "Zona BBQ",
+                    userId = "current_user",
+                    dateTime = Date(System.currentTimeMillis() + 172800000) // Pasado mañana
+                )
+            )
+            _reservations.value = mockReservations
+        }
+    }
+
+    fun deleteReservation(reservationId: String) {
+        val currentReservations = _reservations.value.toMutableList()
+        currentReservations.removeIf { it.id == reservationId }
+        _reservations.value = currentReservations
+    }
+
+    fun modifyReservation(reservationId: String, newDateTime: Date) {
+        val currentReservations = _reservations.value.toMutableList()
+        val index = currentReservations.indexOfFirst { it.id == reservationId }
+        if (index != -1) {
+            val reservation = currentReservations[index]
+            currentReservations[index] = reservation.copy(dateTime = newDateTime)
+            _reservations.value = currentReservations
         }
     }
 }
