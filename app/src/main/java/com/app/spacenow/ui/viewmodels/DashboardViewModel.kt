@@ -20,6 +20,14 @@ class DashboardViewModel : ViewModel() {
     private val _isLoading = MutableStateFlow(false)
     val isLoading = _isLoading.asStateFlow()
 
+    // User role state
+    private val _isAdmin = MutableStateFlow(false)
+    val isAdmin: StateFlow<Boolean> = _isAdmin.asStateFlow()
+
+    fun setUserRole(isAdmin: Boolean) {
+        _isAdmin.value = isAdmin
+    }
+
     init {
         loadMockSpaces()
         loadMockReservations()
