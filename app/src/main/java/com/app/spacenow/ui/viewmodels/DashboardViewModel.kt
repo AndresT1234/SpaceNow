@@ -2,6 +2,7 @@ package com.app.spacenow.ui.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.app.spacenow.R
 import com.app.spacenow.data.model.Space
 import com.app.spacenow.data.model.Reservation
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -24,6 +25,12 @@ class DashboardViewModel : ViewModel() {
     private val _isAdmin = MutableStateFlow(false)
     val isAdmin: StateFlow<Boolean> = _isAdmin.asStateFlow()
 
+    private val _allActiveReservations = MutableStateFlow<List<Reservation>>(emptyList())
+    val allActiveReservations: StateFlow<List<Reservation>> = _allActiveReservations.asStateFlow()
+
+    private val _spaceStatistics = MutableStateFlow<Map<String, Int>>(emptyMap())
+    val spaceStatistics: StateFlow<Map<String, Int>> = _spaceStatistics.asStateFlow()
+
     fun setUserRole(isAdmin: Boolean) {
         _isAdmin.value = isAdmin
     }
@@ -31,6 +38,10 @@ class DashboardViewModel : ViewModel() {
     init {
         loadMockSpaces()
         loadMockReservations()
+        if (isAdmin.value) {
+            loadAllActiveReservations()
+            calculateSpaceStatistics()
+        }
     }
 
     private fun loadMockSpaces() {
@@ -44,7 +55,7 @@ class DashboardViewModel : ViewModel() {
                         description = "Amplio espacio para eventos sociales y reuniones",
                         capacity = 50,
                         available = true,
-                        imageUrl = "https://via.placeholder.com/400x300/2196F3/FFFFFF?text=Salon+Social"
+                        imageResource = R.drawable.salon_social
                     ),
                     Space(
                         id = "2",
@@ -52,7 +63,7 @@ class DashboardViewModel : ViewModel() {
                         description = "Área equipada para asados y reuniones al aire libre",
                         capacity = 20,
                         available = true,
-                        imageUrl = "https://via.placeholder.com/400x300/4CAF50/FFFFFF?text=Zona+BBQ"
+                        imageResource = R.drawable.zona_bbq
                     ),
                     Space(
                         id = "3",
@@ -60,7 +71,7 @@ class DashboardViewModel : ViewModel() {
                         description = "Espacio con equipos modernos para ejercicio",
                         capacity = 15,
                         available = true,
-                        imageUrl = "https://via.placeholder.com/400x300/FFC107/FFFFFF?text=Gimnasio"
+                        imageResource = R.drawable.gimnasio
                     ),
                     Space(
                         id = "4",
@@ -68,7 +79,7 @@ class DashboardViewModel : ViewModel() {
                         description = "Área de relajación y bienestar",
                         capacity = 6,
                         available = true,
-                        imageUrl = "https://via.placeholder.com/400x300/FF5722/FFFFFF?text=Sauna"
+                        imageResource = R.drawable.sauna
                     ),
                     Space(
                         id = "5",
@@ -76,7 +87,7 @@ class DashboardViewModel : ViewModel() {
                         description = "Cancha profesional para práctica y competición",
                         capacity = 4,
                         available = true,
-                        imageUrl = "https://via.placeholder.com/400x300/9C27B0/FFFFFF?text=Cancha+Tenis"
+                        imageResource = R.drawable.cancha_tenis
                     ),
                     Space(
                         id = "6",
@@ -84,7 +95,7 @@ class DashboardViewModel : ViewModel() {
                         description = "Campo de fútbol con césped artificial",
                         capacity = 14,
                         available = true,
-                        imageUrl = "https://via.placeholder.com/400x300/009688/FFFFFF?text=Cancha+Sintetica"
+                        imageResource = R.drawable.cancha_sintetica
                     )
                 )
                 _spaces.value = mockSpaces
@@ -119,6 +130,38 @@ class DashboardViewModel : ViewModel() {
         }
     }
 
+    private fun loadAllActiveReservations() {
+        viewModelScope.launch {
+            val mockAllReservations = listOf(
+                Reservation(
+                    id = "3",
+                    spaceId = "3",
+                    spaceName = "Gimnasio",
+                    userId = "other_user1",
+                    dateTime = Date(System.currentTimeMillis() + 86400000)
+                ),
+                Reservation(
+                    id = "4",
+                    spaceId = "1",
+                    spaceName = "Salón Social",
+                    userId = "other_user2",
+                    dateTime = Date(System.currentTimeMillis() + 172800000)
+                )
+            )
+            _allActiveReservations.value = mockAllReservations
+        }
+    }
+
+    private fun calculateSpaceStatistics() {
+        viewModelScope.launch {
+            val stats = mutableMapOf<String, Int>()
+            (_reservations.value + _allActiveReservations.value).forEach { reservation ->
+                stats[reservation.spaceName] = (stats[reservation.spaceName] ?: 0) + 1
+            }
+            _spaceStatistics.value = stats
+        }
+    }
+
     fun deleteReservation(reservationId: String) {
         val currentReservations = _reservations.value.toMutableList()
         currentReservations.removeIf { it.id == reservationId }
@@ -133,5 +176,10 @@ class DashboardViewModel : ViewModel() {
             currentReservations[index] = reservation.copy(dateTime = newDateTime)
             _reservations.value = currentReservations
         }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        // Clean up any resources if needed
     }
 }
