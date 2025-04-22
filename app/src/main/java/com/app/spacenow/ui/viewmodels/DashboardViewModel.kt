@@ -2,6 +2,7 @@ package com.app.spacenow.ui.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.app.spacenow.R
 import com.app.spacenow.data.model.Space
 import com.app.spacenow.data.model.Reservation
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -54,7 +55,7 @@ class DashboardViewModel : ViewModel() {
                         description = "Amplio espacio para eventos sociales y reuniones",
                         capacity = 50,
                         available = true,
-                        imageUrl = "https://via.placeholder.com/400x300/2196F3/FFFFFF?text=Salon+Social"
+                        imageResource = R.drawable.salon_social
                     ),
                     Space(
                         id = "2",
@@ -62,7 +63,7 @@ class DashboardViewModel : ViewModel() {
                         description = "Área equipada para asados y reuniones al aire libre",
                         capacity = 20,
                         available = true,
-                        imageUrl = "https://via.placeholder.com/400x300/4CAF50/FFFFFF?text=Zona+BBQ"
+                        imageResource = R.drawable.zona_bbq
                     ),
                     Space(
                         id = "3",
@@ -70,7 +71,7 @@ class DashboardViewModel : ViewModel() {
                         description = "Espacio con equipos modernos para ejercicio",
                         capacity = 15,
                         available = true,
-                        imageUrl = "https://via.placeholder.com/400x300/FFC107/FFFFFF?text=Gimnasio"
+                        imageResource = R.drawable.gimnasio
                     ),
                     Space(
                         id = "4",
@@ -78,7 +79,7 @@ class DashboardViewModel : ViewModel() {
                         description = "Área de relajación y bienestar",
                         capacity = 6,
                         available = true,
-                        imageUrl = "https://via.placeholder.com/400x300/FF5722/FFFFFF?text=Sauna"
+                        imageResource = R.drawable.sauna
                     ),
                     Space(
                         id = "5",
@@ -86,7 +87,7 @@ class DashboardViewModel : ViewModel() {
                         description = "Cancha profesional para práctica y competición",
                         capacity = 4,
                         available = true,
-                        imageUrl = "https://via.placeholder.com/400x300/9C27B0/FFFFFF?text=Cancha+Tenis"
+                        imageResource = R.drawable.cancha_tenis
                     ),
                     Space(
                         id = "6",
@@ -94,7 +95,7 @@ class DashboardViewModel : ViewModel() {
                         description = "Campo de fútbol con césped artificial",
                         capacity = 14,
                         available = true,
-                        imageUrl = "https://via.placeholder.com/400x300/009688/FFFFFF?text=Cancha+Sintetica"
+                        imageResource = R.drawable.cancha_sintetica
                     )
                 )
                 _spaces.value = mockSpaces

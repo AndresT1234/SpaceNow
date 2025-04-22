@@ -131,7 +131,7 @@ fun DashboardScreen(
                         )
                     }
 
-                    items(allActiveReservations) { reservation ->
+                    items(allActiveReservations) { reservation -> 
                         AdminReservationItem(reservation = reservation)
                     }
 
@@ -342,7 +342,7 @@ fun SpaceCard(
     ) {
         Column {
             AsyncImage(
-                model = space.imageUrl,
+                model = space.imageResource,
                 contentDescription = space.name,
                 modifier = Modifier
                     .fillMaxWidth()
