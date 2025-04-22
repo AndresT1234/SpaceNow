@@ -24,6 +24,12 @@ class DashboardViewModel : ViewModel() {
     private val _isAdmin = MutableStateFlow(false)
     val isAdmin: StateFlow<Boolean> = _isAdmin.asStateFlow()
 
+    private val _allActiveReservations = MutableStateFlow<List<Reservation>>(emptyList())
+    val allActiveReservations: StateFlow<List<Reservation>> = _allActiveReservations.asStateFlow()
+
+    private val _spaceStatistics = MutableStateFlow<Map<String, Int>>(emptyMap())
+    val spaceStatistics: StateFlow<Map<String, Int>> = _spaceStatistics.asStateFlow()
+
     fun setUserRole(isAdmin: Boolean) {
         _isAdmin.value = isAdmin
     }
@@ -31,6 +37,10 @@ class DashboardViewModel : ViewModel() {
     init {
         loadMockSpaces()
         loadMockReservations()
+        if (isAdmin.value) {
+            loadAllActiveReservations()
+            calculateSpaceStatistics()
+        }
     }
 
     private fun loadMockSpaces() {
@@ -119,6 +129,38 @@ class DashboardViewModel : ViewModel() {
         }
     }
 
+    private fun loadAllActiveReservations() {
+        viewModelScope.launch {
+            val mockAllReservations = listOf(
+                Reservation(
+                    id = "3",
+                    spaceId = "3",
+                    spaceName = "Gimnasio",
+                    userId = "other_user1",
+                    dateTime = Date(System.currentTimeMillis() + 86400000)
+                ),
+                Reservation(
+                    id = "4",
+                    spaceId = "1",
+                    spaceName = "Salón Social",
+                    userId = "other_user2",
+                    dateTime = Date(System.currentTimeMillis() + 172800000)
+                )
+            )
+            _allActiveReservations.value = mockAllReservations
+        }
+    }
+
+    private fun calculateSpaceStatistics() {
+        viewModelScope.launch {
+            val stats = mutableMapOf<String, Int>()
+            (_reservations.value + _allActiveReservations.value).forEach { reservation ->
+                stats[reservation.spaceName] = (stats[reservation.spaceName] ?: 0) + 1
+            }
+            _spaceStatistics.value = stats
+        }
+    }
+
     fun deleteReservation(reservationId: String) {
         val currentReservations = _reservations.value.toMutableList()
         currentReservations.removeIf { it.id == reservationId }
@@ -133,5 +175,10 @@ class DashboardViewModel : ViewModel() {
             currentReservations[index] = reservation.copy(dateTime = newDateTime)
             _reservations.value = currentReservations
         }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        // Clean up any resources if needed
     }
 }

@@ -34,6 +34,8 @@ fun DashboardScreen(
 ) {
     val spaces by viewModel.spaces.collectAsState()
     val reservations by viewModel.reservations.collectAsState()
+    val allActiveReservations by viewModel.allActiveReservations.collectAsState()
+    val spaceStatistics by viewModel.spaceStatistics.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     val isAdmin by viewModel.isAdmin.collectAsState()
     
@@ -119,57 +121,161 @@ fun DashboardScreen(
                     .padding(8.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                item {
-                    Text(
-                        text = "Espacios disponibles",
-                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                        modifier = Modifier.padding(vertical = 8.dp)
-                    )
-                }
-
-                if (isLoading) {
+                if (isAdmin) {
+                    // Admin Dashboard Content
                     item {
-                        Box(
-                            modifier = Modifier.fillMaxWidth(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            CircularProgressIndicator()
-                        }
+                        Text(
+                            text = "Reservas activas",
+                            style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                            modifier = Modifier.padding(vertical = 8.dp)
+                        )
+                    }
+
+                    items(allActiveReservations) { reservation ->
+                        AdminReservationItem(reservation = reservation)
+                    }
+
+                    item {
+                        Text(
+                            text = "Estadísticas de reservas",
+                            style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                            modifier = Modifier.padding(vertical = 8.dp)
+                        )
+                    }
+
+                    item {
+                        StatisticsChart(spaceStatistics = spaceStatistics)
                     }
                 } else {
-                    items(spaces.chunked(2)) { spaceRow ->
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            spaceRow.forEach { space ->
-                                SpaceCard(
-                                    space = space,
-                                    onSpaceClick = onSpaceClick,
-                                    modifier = Modifier.weight(1f)
-                                )
+                    // Regular User Dashboard Content
+                    item {
+                        Text(
+                            text = "Espacios disponibles",
+                            style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                            modifier = Modifier.padding(vertical = 8.dp)
+                        )
+                    }
+
+                    if (isLoading) {
+                        item {
+                            Box(
+                                modifier = Modifier.fillMaxWidth(),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                CircularProgressIndicator()
                             }
-                            // Si solo hay un elemento en la última fila, añadir un espaciador
-                            if (spaceRow.size == 1) {
-                                Spacer(modifier = Modifier.weight(1f))
+                        }
+                    } else {
+                        items(spaces.chunked(2)) { spaceRow ->
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                spaceRow.forEach { space ->
+                                    SpaceCard(
+                                        space = space,
+                                        onSpaceClick = onSpaceClick,
+                                        modifier = Modifier.weight(1f)
+                                    )
+                                }
+                                // Si solo hay un elemento en la última fila, añadir un espaciador
+                                if (spaceRow.size == 1) {
+                                    Spacer(modifier = Modifier.weight(1f))
+                                }
                             }
                         }
                     }
-                }
 
-                item {
+                    item {
+                        Text(
+                            text = "Mis espacios reservados",
+                            style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                            modifier = Modifier.padding(vertical = 8.dp)
+                        )
+                    }
+
+                    items(reservations) { reservation ->
+                        ReservationItem(
+                            reservation = reservation,
+                            onEditClick = { viewModel.modifyReservation(it.id, Date()) },
+                            onDeleteClick = { viewModel.deleteReservation(it.id) }
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun AdminReservationItem(reservation: Reservation) {
+    val dateFormatter = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
+    
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .padding(16.dp)
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = reservation.spaceName,
+                    style = MaterialTheme.typography.titleMedium
+                )
+                Text(
+                    text = "Fecha: ${dateFormatter.format(reservation.dateTime)}",
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                Text(
+                    text = "Usuario: ${reservation.userId}",
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun StatisticsChart(spaceStatistics: Map<String, Int>) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(300.dp)
+            .padding(8.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
+            spaceStatistics.forEach { (spaceName, count) ->
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 4.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
                     Text(
-                        text = "Mis espacios reservados",
-                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                        modifier = Modifier.padding(vertical = 8.dp)
+                        text = spaceName,
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.weight(1f)
                     )
-                }
-
-                items(reservations) { reservation ->
-                    ReservationItem(
-                        reservation = reservation,
-                        onEditClick = { viewModel.modifyReservation(it.id, Date()) },
-                        onDeleteClick = { viewModel.deleteReservation(it.id) }
+                    Text(
+                        text = count.toString(),
+                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold)
+                    )
+                    LinearProgressIndicator(
+                        progress = count.toFloat() / spaceStatistics.values.maxOrNull()!!.toFloat(),
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(start = 8.dp)
+                            .height(8.dp)
                     )
                 }
             }
