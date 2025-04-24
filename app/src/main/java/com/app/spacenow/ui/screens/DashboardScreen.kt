@@ -47,6 +47,8 @@ fun DashboardScreen(
     val activeReservationsRef = remember { mutableStateOf(0) }
     val statisticsRef = remember { mutableStateOf(0) }
 
+    var selectedItem by remember { mutableStateOf("spaces") }
+
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
@@ -55,44 +57,68 @@ fun DashboardScreen(
                 if (isAdmin) {
                     NavigationDrawerItem(
                         label = { Text("Reservas activas") },
-                        selected = false,
+                        selected = selectedItem == "active",
                         onClick = {
                             scope.launch {
+                                selectedItem = "active"
                                 drawerState.close()
                                 lazyListState.scrollToItem(activeReservationsRef.value)
                             }
-                        }
+                        },
+                        colors = NavigationDrawerItemDefaults.colors(
+                            selectedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
+                            selectedTextColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                            selectedIconColor = MaterialTheme.colorScheme.onSecondaryContainer
+                        )
                     )
                     NavigationDrawerItem(
                         label = { Text("Frecuencia de reservas") },
-                        selected = false,
+                        selected = selectedItem == "stats",
                         onClick = {
                             scope.launch {
+                                selectedItem = "stats"
                                 drawerState.close()
                                 lazyListState.scrollToItem(statisticsRef.value)
                             }
-                        }
+                        },
+                        colors = NavigationDrawerItemDefaults.colors(
+                            selectedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
+                            selectedTextColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                            selectedIconColor = MaterialTheme.colorScheme.onSecondaryContainer
+                        )
                     )
                 } else {
                     NavigationDrawerItem(
                         label = { Text("Espacios disponibles") },
-                        selected = true,
+                        selected = selectedItem == "spaces",
                         onClick = {
                             scope.launch {
+                                selectedItem = "spaces"
                                 drawerState.close()
                                 lazyListState.scrollToItem(availableSpacesRef.value)
                             }
-                        }
+                        },
+                        colors = NavigationDrawerItemDefaults.colors(
+                            selectedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
+                            selectedTextColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                            selectedIconColor = MaterialTheme.colorScheme.onSecondaryContainer
+                        )
                     )
                     NavigationDrawerItem(
                         label = { Text("Mis espacios reservados") },
-                        selected = false,
+                        selected = selectedItem == "reservations",
                         onClick = {
                             scope.launch {
+                                selectedItem = "reservations"
                                 drawerState.close()
                                 lazyListState.scrollToItem(myReservationsRef.value)
                             }
-                        }
+                        },
+                        colors = NavigationDrawerItemDefaults.colors(
+                            selectedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
+                            selectedTextColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                            selectedIconColor = MaterialTheme.colorScheme.onSecondaryContainer
+                        )
                     )
                 }
                 Spacer(Modifier.weight(1f))

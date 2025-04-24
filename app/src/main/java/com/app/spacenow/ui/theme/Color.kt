@@ -10,6 +10,15 @@ val Purple40 = Color(0xFF6650a4)
 val PurpleGrey40 = Color(0xFF625b71)
 val Pink40 = Color(0xFF7D5260)
 
+// Brown color palette
+val Brown80 = Color(0xFFBCAAA4)
+val BrownGrey80 = Color(0xFFB4A69C)
+val Beige80 = Color(0xFFE5D3C5)
+
+val Brown40 = Color(0xFF795548)
+val BrownGrey40 = Color(0xFF6D4C41)
+val Beige40 = Color(0xFFBCAAA4)
+
 // Background colors
 val DarkBackground = Color(0xFF121212)
 val LightBackground = Color(0xFFF5F5F5)
