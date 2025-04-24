@@ -3,16 +3,19 @@ package com.app.spacenow.ui.screens
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
 import com.app.spacenow.R
 import com.app.spacenow.data.model.Space
 import com.app.spacenow.ui.viewmodels.DashboardViewModel
@@ -24,6 +27,7 @@ import java.util.*
 @Composable
 fun DashboardScreen(
     viewModel: DashboardViewModel = viewModel(),
+    navController: NavHostController,
     onSpaceClick: (Space) -> Unit
 ) {
     val spaces by viewModel.spaces.collectAsState()
@@ -35,6 +39,13 @@ fun DashboardScreen(
     
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
+    val lazyListState = rememberLazyListState()
+
+    // Referencias para el scroll
+    val availableSpacesRef = remember { mutableStateOf(0) }
+    val myReservationsRef = remember { mutableStateOf(0) }
+    val activeReservationsRef = remember { mutableStateOf(0) }
+    val statisticsRef = remember { mutableStateOf(0) }
 
     ModalNavigationDrawer(
         drawerState = drawerState,
@@ -42,28 +53,46 @@ fun DashboardScreen(
             ModalDrawerSheet {
                 Spacer(Modifier.height(16.dp))
                 if (isAdmin) {
-                    // Menú para administradores
                     NavigationDrawerItem(
                         label = { Text("Reservas activas") },
                         selected = false,
-                        onClick = { /* TODO: Implementar navegación */ }
+                        onClick = {
+                            scope.launch {
+                                drawerState.close()
+                                lazyListState.scrollToItem(activeReservationsRef.value)
+                            }
+                        }
                     )
                     NavigationDrawerItem(
                         label = { Text("Frecuencia de reservas") },
                         selected = false,
-                        onClick = { /* TODO: Implementar navegación */ }
+                        onClick = {
+                            scope.launch {
+                                drawerState.close()
+                                lazyListState.scrollToItem(statisticsRef.value)
+                            }
+                        }
                     )
                 } else {
-                    // Menú para usuarios normales
                     NavigationDrawerItem(
                         label = { Text("Espacios disponibles") },
                         selected = true,
-                        onClick = { /* Estamos en esta vista */ }
+                        onClick = {
+                            scope.launch {
+                                drawerState.close()
+                                lazyListState.scrollToItem(availableSpacesRef.value)
+                            }
+                        }
                     )
                     NavigationDrawerItem(
                         label = { Text("Mis espacios reservados") },
                         selected = false,
-                        onClick = { /* TODO: Implementar navegación */ }
+                        onClick = {
+                            scope.launch {
+                                drawerState.close()
+                                lazyListState.scrollToItem(myReservationsRef.value)
+                            }
+                        }
                     )
                 }
                 Spacer(Modifier.weight(1f))
@@ -74,7 +103,12 @@ fun DashboardScreen(
                         unselectedIconColor = MaterialTheme.colorScheme.error,
                         unselectedTextColor = MaterialTheme.colorScheme.error
                     ),
-                    onClick = { /* TODO: Implementar cierre de sesión */ }
+                    onClick = {
+                        scope.launch {
+                            drawerState.close()
+                            // TODO: Implementar lógica de cierre de sesión
+                        }
+                    }
                 )
                 Spacer(Modifier.height(16.dp))
             }
@@ -109,6 +143,7 @@ fun DashboardScreen(
             }
         ) { paddingValues ->
             LazyColumn(
+                state = lazyListState,
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(paddingValues)
@@ -121,7 +156,11 @@ fun DashboardScreen(
                         Text(
                             text = "Reservas activas",
                             style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                            modifier = Modifier.padding(vertical = 8.dp)
+                            modifier = Modifier
+                                .padding(vertical = 8.dp)
+                                .onGloballyPositioned { coordinates ->
+                                    activeReservationsRef.value = 0
+                                }
                         )
                     }
 
@@ -133,7 +172,11 @@ fun DashboardScreen(
                         Text(
                             text = "Estadísticas de reservas",
                             style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                            modifier = Modifier.padding(vertical = 8.dp)
+                            modifier = Modifier
+                                .padding(vertical = 8.dp)
+                                .onGloballyPositioned { coordinates ->
+                                    statisticsRef.value = allActiveReservations.size + 1
+                                }
                         )
                     }
 
@@ -146,7 +189,11 @@ fun DashboardScreen(
                         Text(
                             text = "Espacios disponibles",
                             style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                            modifier = Modifier.padding(vertical = 8.dp)
+                            modifier = Modifier
+                                .padding(vertical = 8.dp)
+                                .onGloballyPositioned { coordinates ->
+                                    availableSpacesRef.value = 0
+                                }
                         )
                     }
 
@@ -183,7 +230,11 @@ fun DashboardScreen(
                         Text(
                             text = "Mis espacios reservados",
                             style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                            modifier = Modifier.padding(vertical = 8.dp)
+                            modifier = Modifier
+                                .padding(vertical = 8.dp)
+                                .onGloballyPositioned { coordinates ->
+                                    myReservationsRef.value = spaces.size + 2
+                                }
                         )
                     }
 

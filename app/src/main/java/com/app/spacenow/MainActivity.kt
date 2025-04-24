@@ -6,6 +6,7 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -30,8 +31,21 @@ class MainActivity : ComponentActivity() {
                     ) {
                         composable("dashboard") {
                             DashboardScreen(
+                                navController = navController,
                                 onSpaceClick = { /* TODO: Implementar navegación al detalle */ }
                             )
+                        }
+                        composable("active-reservations") {
+                            // TODO: Implementar pantalla de reservas activas
+                            Text("Reservas Activas")
+                        }
+                        composable("reservation-stats") {
+                            // TODO: Implementar pantalla de estadísticas
+                            Text("Estadísticas de Reservas")
+                        }
+                        composable("my-reservations") {
+                            // TODO: Implementar pantalla de mis reservas
+                            Text("Mis Espacios Reservados")
                         }
                     }
                 }
