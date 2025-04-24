@@ -19,7 +19,15 @@ private val DarkColorScheme = darkColorScheme(
     secondary = BeigeDark,
     tertiary = BeigeLight,
     background = DarkBackground,
-    surface = DarkSurface
+    surface = DarkSurface,
+    onPrimary = LightGray,
+    onSecondary = LightGray,
+    onTertiary = Brown,
+    onBackground = LightGray,
+    onSurface = LightGray,
+    secondaryContainer = BeigeDark,
+    onSecondaryContainer = LightGray,
+    error = Brown
 )
 
 private val LightColorScheme = lightColorScheme(
@@ -27,13 +35,20 @@ private val LightColorScheme = lightColorScheme(
     secondary = BeigeDark,
     tertiary = BeigeLight,
     background = LightBackground,
-    surface = LightSurface
+    surface = LightSurface,
+    onPrimary = LightGray,
+    onSecondary = Brown,
+    onTertiary = Brown,
+    onBackground = Brown,
+    onSurface = Brown,
+    secondaryContainer = BeigeLight,
+    onSecondaryContainer = Brown,
+    error = Brown
 )
 
 @Composable
 fun SpaceNowTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
     dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
