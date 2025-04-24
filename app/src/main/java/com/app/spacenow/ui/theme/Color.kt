@@ -2,22 +2,11 @@ package com.app.spacenow.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-val Purple80 = Color(0xFFD0BCFF)
-val PurpleGrey80 = Color(0xFFCCC2DC)
-val Pink80 = Color(0xFFEFB8C8)
-
-val Purple40 = Color(0xFF6650a4)
-val PurpleGrey40 = Color(0xFF625b71)
-val Pink40 = Color(0xFF7D5260)
-
-// Brown color palette
-val Brown80 = Color(0xFFBCAAA4)
-val BrownGrey80 = Color(0xFFB4A69C)
-val Beige80 = Color(0xFFE5D3C5)
-
-val Brown40 = Color(0xFF795548)
-val BrownGrey40 = Color(0xFF6D4C41)
-val Beige40 = Color(0xFFBCAAA4)
+// Main color palette
+val LightGray = Color(0xFFE4E0E1)  // #e4e0e1
+val BeigeLight = Color(0xFFD6C0B3)  // #d6c0b3
+val BeigeDark = Color(0xFFAB886D)  // #ab886d
+val Brown = Color(0xFF493628)  // #493628
 
 // Background colors
 val DarkBackground = Color(0xFF121212)
@@ -26,11 +15,6 @@ val LightBackground = Color(0xFFF5F5F5)
 // Surface colors for cards
 val DarkSurface = Color(0xFF272727)
 val LightSurface = Color(0xFFFFFFFF)
-
-val LightGray = Color(0xFFE4E0E1)
-val BeigeLight = Color(0xFFD6C0B3)
-val BeigeDark = Color(0xFFAB886D)
-val Brown = Color(0xFF493628)
 
 // Estado colors
 val AvailableGreen = Color(0xFF4CAF50) // Color verde para el badge de disponible

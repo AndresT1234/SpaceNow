@@ -15,17 +15,17 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 
 private val DarkColorScheme = darkColorScheme(
-    primary = Brown80,
-    secondary = BrownGrey80,
-    tertiary = Beige80,
+    primary = Brown,
+    secondary = BeigeDark,
+    tertiary = BeigeLight,
     background = DarkBackground,
     surface = DarkSurface
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = Brown40,
-    secondary = BrownGrey40,
-    tertiary = Beige40,
+    primary = Brown,
+    secondary = BeigeDark,
+    tertiary = BeigeLight,
     background = LightBackground,
     surface = LightSurface
 )
@@ -33,7 +33,8 @@ private val LightColorScheme = lightColorScheme(
 @Composable
 fun SpaceNowTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    dynamicColor: Boolean = false, // Deshabilitamos dynamic color para usar nuestra paleta
+    // Dynamic color is available on Android 12+
+    dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {
@@ -43,6 +44,13 @@ fun SpaceNowTheme(
         }
         darkTheme -> DarkColorScheme
         else -> LightColorScheme
+    }
+    val view = LocalView.current
+    if (!view.isInEditMode) {
+        SideEffect {
+            val window = (view.context as Activity).window
+            window.statusBarColor = colorScheme.primary.toArgb()
+        }
     }
 
     MaterialTheme(
