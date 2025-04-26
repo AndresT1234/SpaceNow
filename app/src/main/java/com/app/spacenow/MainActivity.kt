@@ -12,6 +12,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.app.spacenow.ui.screens.DashboardScreen
+import com.app.spacenow.ui.screens.RegisterScreen
 import com.app.spacenow.ui.theme.SpaceNowTheme
 
 class MainActivity : ComponentActivity() {
@@ -46,6 +47,10 @@ class MainActivity : ComponentActivity() {
                         composable("my-reservations") {
                             // TODO: Implementar pantalla de mis reservas
                             Text("Mis Espacios Reservados")
+                        }
+                        // Pagina de Registro
+                        composable("register") {
+                            RegisterScreen(navController = navController)
                         }
                     }
                 }

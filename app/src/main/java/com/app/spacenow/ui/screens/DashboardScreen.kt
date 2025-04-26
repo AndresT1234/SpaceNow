@@ -272,6 +272,14 @@ fun DashboardScreen(
                         )
                     }
                 }
+                item {
+                    Button(
+                        onClick = { navController.navigate("register") },
+                        modifier = Modifier.padding(16.dp)
+                    ) {
+                        Text("Ir a Registro")
+                    }
+                }
             }
         }
     }
