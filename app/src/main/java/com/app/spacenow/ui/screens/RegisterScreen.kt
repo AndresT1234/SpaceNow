@@ -43,6 +43,7 @@ fun RegisterScreen(navController: NavController) {
 
         Spacer(modifier = Modifier.height(32.dp))
 
+        // Campo de Nombre
         NameInput(value = name, onValueChange = {
             name = it
             nameError = ValidationUtils.validateNameOrLastName(it)
@@ -50,6 +51,7 @@ fun RegisterScreen(navController: NavController) {
 
         Spacer(modifier = Modifier.height(8.dp))
 
+        // Campo de Apellido
         LastNameInput(value = lastName, onValueChange = {
             lastName = it
             lastNameError = ValidationUtils.validateNameOrLastName(it)
@@ -57,6 +59,7 @@ fun RegisterScreen(navController: NavController) {
 
         Spacer(modifier = Modifier.height(8.dp))
 
+        // Campo de Correo Electrónico
         EmailInput(value = email, onValueChange = {
             email = it
             emailError = ValidationUtils.validateEmail(it)
@@ -64,6 +67,7 @@ fun RegisterScreen(navController: NavController) {
 
         Spacer(modifier = Modifier.height(8.dp))
 
+        // Campo de Número de Teléfono
         PhoneNumberInput(value = phoneNumber, onValueChange = {
             phoneNumber = it
             phoneError = ValidationUtils.validatePhoneNumber(it)
@@ -71,6 +75,7 @@ fun RegisterScreen(navController: NavController) {
 
         Spacer(modifier = Modifier.height(8.dp))
 
+        // Campo de Contraseña
         PasswordInput(value = password, onValueChange = {
             password = it
             passwordError = ValidationUtils.validatePassword(it)
@@ -78,6 +83,7 @@ fun RegisterScreen(navController: NavController) {
 
         Spacer(modifier = Modifier.height(8.dp))
 
+        // Campo de Confirmar Contraseña
         ConfirmPasswordInput(value = confirmPassword, onValueChange = {
             confirmPassword = it
             confirmPasswordError = ValidationUtils.validateConfirmPassword(password, it)
@@ -85,6 +91,7 @@ fun RegisterScreen(navController: NavController) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
+        // Botón de Registro
         PrimaryButton(
             text = "Registro",
             modifier = Modifier.fillMaxWidth(),
