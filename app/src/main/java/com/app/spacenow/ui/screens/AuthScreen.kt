@@ -35,35 +35,25 @@ fun AuthScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(32.dp),
+            .padding(horizontal = 32.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text("Bienvenido a SpaceNow 🪐", style = MaterialTheme.typography.headlineMedium)
+        Title()
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        TextFieldInput(
-            value = email,
-            onValueChange = { email = it },
-            label = "Correo electrónico",
-            keyboardType = KeyboardType.Email
-        )
+        EmailInput(email) { email = it }
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        TextFieldInput(
-            value = password,
-            onValueChange = { password = it },
-            label = "Contraseña",
-            keyboardType = KeyboardType.Password,
-            visualTransformation = PasswordVisualTransformation()
-        )
+        PasswordInput(password) { password = it }
 
         Spacer(modifier = Modifier.height(24.dp))
 
         PrimaryButton(
             text = "Iniciar Sesión",
+            modifier = Modifier.fillMaxWidth(),
             onClick = { authViewModel.login(email, password) }
         )
 
@@ -71,19 +61,56 @@ fun AuthScreen(
 
         PrimaryButton(
             text = "Registrarse",
-            onClick = { authViewModel.register(email, password) }
+            modifier = Modifier.fillMaxWidth(),
+            onClick = { navController.navigate("register") }
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        if (errorMessage != null) {
-            Text(
-                text = errorMessage!!,
-                color = MaterialTheme.colorScheme.error,
-                style = MaterialTheme.typography.bodyMedium
-            )
+        errorMessage?.let {
+            ErrorMessage(it)
         }
     }
+}
+
+@Composable
+private fun Title() {
+    Text(
+        text = "Bienvenido a SpaceNow",
+        style = MaterialTheme.typography.headlineMedium
+    )
+}
+
+@Composable
+private fun EmailInput(value: String, onValueChange: (String) -> Unit) {
+    TextFieldInput(
+        value = value,
+        onValueChange = onValueChange,
+        label = "Correo electrónico",
+        keyboardType = KeyboardType.Email,
+        modifier = Modifier.fillMaxWidth()
+    )
+}
+
+@Composable
+private fun PasswordInput(value: String, onValueChange: (String) -> Unit) {
+    TextFieldInput(
+        value = value,
+        onValueChange = onValueChange,
+        label = "Contraseña",
+        keyboardType = KeyboardType.Password,
+        visualTransformation = PasswordVisualTransformation(),
+        modifier = Modifier.fillMaxWidth()
+    )
+}
+
+@Composable
+private fun ErrorMessage(message: String) {
+    Text(
+        text = message,
+        color = MaterialTheme.colorScheme.error,
+        style = MaterialTheme.typography.bodyMedium
+    )
 }
 
 
