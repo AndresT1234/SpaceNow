@@ -37,4 +37,13 @@ object ValidationUtils {
             else -> null
         }
     }
+
+    // Validar Confirmación de Contraseña
+    fun validateConfirmPassword(password: String, confirmPassword: String): String? {
+        return when {
+            confirmPassword.isEmpty() -> "Debe confirmar la contraseña."
+            password != confirmPassword -> "Las contraseñas no coinciden."
+            else -> null
+        }
+    }    
 }

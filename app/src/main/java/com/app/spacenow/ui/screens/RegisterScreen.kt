@@ -24,6 +24,7 @@ fun RegisterScreen(navController: NavController) {
     var lastNameError by remember { mutableStateOf<String?>(null) }
     var emailError by remember { mutableStateOf<String?>(null) }
     var passwordError by remember { mutableStateOf<String?>(null) }
+    var confirmPasswordError by remember { mutableStateOf<String?>(null) }
 
     Column(
         modifier = Modifier
@@ -99,11 +100,16 @@ fun RegisterScreen(navController: NavController) {
         // Campo de Confirmar Contraseña
         TextField(
             value = confirmPassword,
-            onValueChange = { confirmPassword = it },
+            onValueChange = {
+                confirmPassword = it
+                confirmPasswordError = ValidationUtils.validateConfirmPassword(password, it)
+            },
             label = { Text("Confirmar Contraseña") },
             visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+            isError = confirmPasswordError != null,
             modifier = Modifier.fillMaxWidth()
         )
+        if (confirmPasswordError != null) Text(confirmPasswordError!!, color = MaterialTheme.colorScheme.error)
 
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -114,7 +120,8 @@ fun RegisterScreen(navController: NavController) {
                 lastNameError = ValidationUtils.validateNameOrLastName(lastName)
                 emailError = ValidationUtils.validateEmail(email)
                 passwordError = ValidationUtils.validatePassword(password)
-                
+                confirmPasswordError = ValidationUtils.validateConfirmPassword(password, confirmPassword)
+
                 if (nameError == null && lastNameError == null) {
                     // TODO: Implementar lógica de registro
                 }
