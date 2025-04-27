@@ -272,6 +272,7 @@ fun DashboardScreen(
                         )
                     }
                 }
+                // Botón para ir a Registro
                 item {
                     Button(
                         onClick = { navController.navigate("register") },

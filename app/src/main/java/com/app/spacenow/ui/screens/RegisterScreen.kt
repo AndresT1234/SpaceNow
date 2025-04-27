@@ -8,6 +8,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.app.spacenow.ui.utils.ValidationUtils
 
 @Composable
 fun RegisterScreen(navController: NavController) {
@@ -17,6 +18,10 @@ fun RegisterScreen(navController: NavController) {
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
+
+    // Errores
+    var nameError by remember { mutableStateOf<String?>(null) }
+    var lastNameError by remember { mutableStateOf<String?>(null) }
 
     Column(
         modifier = Modifier
@@ -31,20 +36,30 @@ fun RegisterScreen(navController: NavController) {
         // Campo de Nombre
         TextField(
             value = name,
-            onValueChange = { name = it },
+            onValueChange = {
+                name = it
+                nameError = ValidationUtils.validateNameOrLastName(it)
+            },
             label = { Text("Nombre") },
+            isError = nameError != null,
             modifier = Modifier.fillMaxWidth()
         )
+        if (nameError != null) Text(nameError!!, color = MaterialTheme.colorScheme.error)
 
         Spacer(modifier = Modifier.height(8.dp))
 
         // Campo de Apellido
         TextField(
             value = lastName,
-            onValueChange = { lastName = it },
+            onValueChange = {
+                lastName = it
+                lastNameError = ValidationUtils.validateNameOrLastName(it)
+            },
             label = { Text("Apellido") },
+            isError = lastNameError != null,
             modifier = Modifier.fillMaxWidth()
         )
+        if (lastNameError != null) Text(lastNameError!!, color = MaterialTheme.colorScheme.error)
 
         Spacer(modifier = Modifier.height(8.dp))
 
@@ -83,11 +98,11 @@ fun RegisterScreen(navController: NavController) {
         // Botón de Registro
         Button(
             onClick = {
-                // TODO: Implementar lógica de registro
-                if (password == confirmPassword) {
-                    // Navegar a otra pantalla o mostrar mensaje de éxito
-                } else {
-                    // Mostrar error de contraseñas no coinciden
+                nameError = ValidationUtils.validateNameOrLastName(name)
+                lastNameError = ValidationUtils.validateNameOrLastName(lastName)
+
+                if (nameError == null && lastNameError == null) {
+                    // TODO: Implementar lógica de registro
                 }
             },
             modifier = Modifier.fillMaxWidth()
