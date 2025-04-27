@@ -24,6 +24,16 @@ object ValidationUtils {
             else -> null
         }
     }
+    
+    // Validar Número de Teléfono
+    fun validatePhoneNumber(phone: String): String? {
+        val trimmedPhone = phone.trim()
+        return when {
+            trimmedPhone.isEmpty() -> "El número de teléfono es obligatorio."
+            !trimmedPhone.matches(Regex("^\\d{10}$")) -> "Debe ser un número de 10 dígitos."
+            else -> null
+        }
+    }
 
     // Validar Contraseña
     fun validatePassword(password: String): String? {

@@ -15,6 +15,7 @@ fun RegisterScreen(navController: NavController) {
     var name by remember { mutableStateOf("") }
     var lastName by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
+    var phoneNumber by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
@@ -23,6 +24,7 @@ fun RegisterScreen(navController: NavController) {
     var nameError by remember { mutableStateOf<String?>(null) }
     var lastNameError by remember { mutableStateOf<String?>(null) }
     var emailError by remember { mutableStateOf<String?>(null) }
+    var phoneError by remember { mutableStateOf<String?>(null) }
     var passwordError by remember { mutableStateOf<String?>(null) }
     var confirmPasswordError by remember { mutableStateOf<String?>(null) }
 
@@ -79,6 +81,23 @@ fun RegisterScreen(navController: NavController) {
         )
         
         if (emailError != null) Text(emailError!!, color = MaterialTheme.colorScheme.error)
+        
+        Spacer(modifier = Modifier.height(8.dp))
+
+        // Campo de Número de Teléfono
+        TextField(
+            value = phoneNumber,
+            onValueChange = {
+                phoneNumber = it
+                phoneError = ValidationUtils.validatePhoneNumber(it)
+            },
+            label = { Text("Número de Teléfono") },
+            isError = phoneError != null,
+            modifier = Modifier.fillMaxWidth()
+        )
+        
+        if (phoneError != null) Text(phoneError!!, color = MaterialTheme.colorScheme.error)
+
         Spacer(modifier = Modifier.height(8.dp))
 
         // Campo de Contraseña
@@ -119,6 +138,7 @@ fun RegisterScreen(navController: NavController) {
                 nameError = ValidationUtils.validateNameOrLastName(name)
                 lastNameError = ValidationUtils.validateNameOrLastName(lastName)
                 emailError = ValidationUtils.validateEmail(email)
+                phoneError = ValidationUtils.validatePhoneNumber(phoneNumber)
                 passwordError = ValidationUtils.validatePassword(password)
                 confirmPasswordError = ValidationUtils.validateConfirmPassword(password, confirmPassword)
 
