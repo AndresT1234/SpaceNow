@@ -24,4 +24,17 @@ object ValidationUtils {
             else -> null
         }
     }
+
+    // Validar Contraseña
+    fun validatePassword(password: String): String? {
+        return when {
+            password.isEmpty() -> "La contraseña es obligatoria."
+            password.length < 8 -> "Debe tener al menos 8 caracteres."
+            !password.matches(Regex(".*[A-Z].*")) -> "Debe contener al menos una letra mayúscula."
+            !password.matches(Regex(".*[a-z].*")) -> "Debe contener al menos una letra minúscula."
+            !password.matches(Regex(".*\\d.*")) -> "Debe contener al menos un número."
+            !password.matches(Regex(".*[!@#\$%^&*].*")) -> "Debe contener al menos un símbolo (!@#\$%^&*)."
+            else -> null
+        }
+    }
 }
