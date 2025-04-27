@@ -15,6 +15,7 @@ fun RegisterScreen(navController: NavController) {
     var name by remember { mutableStateOf("") }
     var lastName by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
+    var phoneNumber by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
@@ -79,7 +80,16 @@ fun RegisterScreen(navController: NavController) {
         )
         
         if (emailError != null) Text(emailError!!, color = MaterialTheme.colorScheme.error)
+        
         Spacer(modifier = Modifier.height(8.dp))
+
+        // Campo de Número de Teléfono
+        TextField(
+            value = phoneNumber,
+            onValueChange = { phoneNumber = it },
+            label = { Text("Número de Teléfono") },
+            modifier = Modifier.fillMaxWidth()
+        )
 
         // Campo de Contraseña
         TextField(
