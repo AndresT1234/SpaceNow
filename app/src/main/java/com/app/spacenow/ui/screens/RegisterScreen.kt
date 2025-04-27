@@ -22,6 +22,7 @@ fun RegisterScreen(navController: NavController) {
     // Errores
     var nameError by remember { mutableStateOf<String?>(null) }
     var lastNameError by remember { mutableStateOf<String?>(null) }
+    var emailError by remember { mutableStateOf<String?>(null) }
 
     Column(
         modifier = Modifier
@@ -66,11 +67,16 @@ fun RegisterScreen(navController: NavController) {
         // Campo de Correo
         TextField(
             value = email,
-            onValueChange = { email = it },
+            onValueChange = {
+                email = it
+                emailError = ValidationUtils.validateEmail(it)
+            },
             label = { Text("Correo Electrónico") },
+            isError = emailError != null,
             modifier = Modifier.fillMaxWidth()
         )
-
+        
+        if (emailError != null) Text(emailError!!, color = MaterialTheme.colorScheme.error)
         Spacer(modifier = Modifier.height(8.dp))
 
         // Campo de Contraseña
@@ -100,6 +106,7 @@ fun RegisterScreen(navController: NavController) {
             onClick = {
                 nameError = ValidationUtils.validateNameOrLastName(name)
                 lastNameError = ValidationUtils.validateNameOrLastName(lastName)
+                emailError = ValidationUtils.validateEmail(email)
 
                 if (nameError == null && lastNameError == null) {
                     // TODO: Implementar lógica de registro
