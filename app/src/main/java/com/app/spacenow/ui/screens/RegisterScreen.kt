@@ -12,6 +12,7 @@ import androidx.navigation.NavController
 import com.app.spacenow.ui.utils.ValidationUtils
 import com.app.spacenow.ui.components.PrimaryButton
 import com.app.spacenow.ui.components.TextFieldInput
+import androidx.compose.ui.text.style.*
 
 @Composable
 fun RegisterScreen(navController: NavController) {
@@ -122,7 +123,9 @@ fun RegisterScreen(navController: NavController) {
 private fun Title() {
     Text(
         text = "Registro de Usuario",
-        style = MaterialTheme.typography.headlineMedium
+        style = MaterialTheme.typography.headlineMedium,
+        modifier = Modifier.fillMaxWidth(),
+        textAlign = TextAlign.Center
     )
 }
 
