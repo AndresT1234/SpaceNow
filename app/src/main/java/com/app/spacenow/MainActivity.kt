@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -17,8 +16,11 @@ import com.app.spacenow.ui.screens.DashboardScreen
 import com.app.spacenow.ui.screens.RegisterScreen
 import com.app.spacenow.ui.theme.SpaceNowTheme
 import com.app.spacenow.ui.viewmodels.AuthViewModel
+import androidx.activity.*
 
 class MainActivity : ComponentActivity() {
+    private val authViewModel: AuthViewModel by viewModels()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -28,8 +30,8 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     val navController = rememberNavController()
-                    val authViewModel: AuthViewModel = viewModel()
 
+                    // Usamos una única instancia de authViewModel
                     NavHost(
                         navController = navController,
                         startDestination = "auth"
@@ -37,7 +39,7 @@ class MainActivity : ComponentActivity() {
                         composable("auth") {
                             AuthScreen(
                                 navController = navController,
-                                authViewModel = authViewModel
+                                authViewModel = authViewModel // Pasamos el ViewModel correcto
                             )
                         }
                         composable("dashboard") {
@@ -58,9 +60,12 @@ class MainActivity : ComponentActivity() {
                             // TODO: Implementar pantalla de mis reservas
                             Text("Mis Espacios Reservados")
                         }
-                        // Pagina de Registro
+                        // Página de Registro
                         composable("register") {
-                            RegisterScreen(navController = navController)
+                            RegisterScreen(
+                                navController = navController,
+                                authViewModel = authViewModel
+                            )
                         }
                     }
                 }

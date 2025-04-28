@@ -61,7 +61,9 @@ fun AuthScreen(
         PrimaryButton(
             text = "Iniciar Sesión",
             modifier = Modifier.fillMaxWidth(),
-            onClick = { authViewModel.login(email, password) }
+            onClick = {
+                authViewModel.login(email, password)
+            }
         )
 
         Spacer(modifier = Modifier.height(8.dp))

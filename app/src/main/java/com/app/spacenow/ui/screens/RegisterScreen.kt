@@ -8,14 +8,18 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.text.style.TextAlign
 import androidx.navigation.NavController
 import com.app.spacenow.ui.utils.ValidationUtils
 import com.app.spacenow.ui.components.PrimaryButton
 import com.app.spacenow.ui.components.TextFieldInput
-import androidx.compose.ui.text.style.*
+import com.app.spacenow.ui.viewmodels.AuthViewModel
 
 @Composable
-fun RegisterScreen(navController: NavController) {
+fun RegisterScreen(
+    navController: NavController,
+    authViewModel: AuthViewModel
+) {
     // Variables de estado
     var name by remember { mutableStateOf("") }
     var lastName by remember { mutableStateOf("") }
@@ -33,18 +37,27 @@ fun RegisterScreen(navController: NavController) {
     var passwordError by remember { mutableStateOf<String?>(null) }
     var confirmPasswordError by remember { mutableStateOf<String?>(null) }
 
+    val isAuthenticated by authViewModel.isAuthenticated.collectAsState()
+    val errorMessage by authViewModel.errorMessage.collectAsState()
+
+    LaunchedEffect(isAuthenticated) {
+        if (isAuthenticated) {
+            navController.navigate("dashboard") {
+                popUpTo("register") { inclusive = true }
+            }
+        }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp),
         verticalArrangement = Arrangement.Center
     ) {
-
         Title()
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        // Campo de Nombre
         NameInput(value = name, onValueChange = {
             name = it
             nameError = ValidationUtils.validateNameOrLastName(it)
@@ -52,7 +65,6 @@ fun RegisterScreen(navController: NavController) {
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        // Campo de Apellido
         LastNameInput(value = lastName, onValueChange = {
             lastName = it
             lastNameError = ValidationUtils.validateNameOrLastName(it)
@@ -60,7 +72,6 @@ fun RegisterScreen(navController: NavController) {
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        // Campo de Correo Electrónico
         EmailInput(value = email, onValueChange = {
             email = it
             emailError = ValidationUtils.validateEmail(it)
@@ -68,7 +79,6 @@ fun RegisterScreen(navController: NavController) {
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        // Campo de Número de Teléfono
         PhoneNumberInput(value = phoneNumber, onValueChange = {
             phoneNumber = it
             phoneError = ValidationUtils.validatePhoneNumber(it)
@@ -76,7 +86,6 @@ fun RegisterScreen(navController: NavController) {
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        // Campo de Contraseña
         PasswordInput(value = password, onValueChange = {
             password = it
             passwordError = ValidationUtils.validatePassword(it)
@@ -84,7 +93,6 @@ fun RegisterScreen(navController: NavController) {
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        // Campo de Confirmar Contraseña
         ConfirmPasswordInput(value = confirmPassword, onValueChange = {
             confirmPassword = it
             confirmPasswordError = ValidationUtils.validateConfirmPassword(password, it)
@@ -92,12 +100,11 @@ fun RegisterScreen(navController: NavController) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Botón de Registro
         PrimaryButton(
-            text = "Registro",
+            text = "Registrar",
             modifier = Modifier.fillMaxWidth(),
             onClick = {
-                // Validación final
+                // Validar campos
                 nameError = ValidationUtils.validateNameOrLastName(name)
                 lastNameError = ValidationUtils.validateNameOrLastName(lastName)
                 emailError = ValidationUtils.validateEmail(email)
@@ -105,17 +112,29 @@ fun RegisterScreen(navController: NavController) {
                 passwordError = ValidationUtils.validatePassword(password)
                 confirmPasswordError = ValidationUtils.validateConfirmPassword(password, confirmPassword)
 
-                // Verificar si no hay errores
                 if (nameError == null && lastNameError == null && emailError == null &&
                     phoneError == null && passwordError == null && confirmPasswordError == null) {
 
-                    // authViewModel.register(name, lastName, email, phoneNumber, password)
-                    // navController.navigate("dashboard") {
-                    //    popUpTo("register") { inclusive = true }
-                    //}
+                    // Llamar al ViewModel para registrarse
+                    authViewModel.register(name, lastName, email, phoneNumber, password)
+                    navController.navigate("auth") {
+                        popUpTo("register") { inclusive = true }
+                    }
                 }
             }
         )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        errorMessage?.let {
+            Text(
+                text = it,
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Center
+            )
+        }
     }
 }
 
@@ -129,6 +148,7 @@ private fun Title() {
     )
 }
 
+// Inputs
 @Composable
 private fun NameInput(value: String, onValueChange: (String) -> Unit, nameError: String?) {
     TextFieldInput(
@@ -138,13 +158,7 @@ private fun NameInput(value: String, onValueChange: (String) -> Unit, nameError:
         keyboardType = KeyboardType.Text,
         modifier = Modifier.fillMaxWidth()
     )
-    nameError?.let {
-        Text(
-            text = it,
-            color = MaterialTheme.colorScheme.error,
-            style = MaterialTheme.typography.bodySmall
-        )
-    }
+    nameError?.let { ErrorText(it) }
 }
 
 @Composable
@@ -156,13 +170,7 @@ private fun LastNameInput(value: String, onValueChange: (String) -> Unit, lastNa
         keyboardType = KeyboardType.Text,
         modifier = Modifier.fillMaxWidth()
     )
-    lastNameError?.let {
-        Text(
-            text = it,
-            color = MaterialTheme.colorScheme.error,
-            style = MaterialTheme.typography.bodySmall
-        )
-    }
+    lastNameError?.let { ErrorText(it) }
 }
 
 @Composable
@@ -174,13 +182,7 @@ private fun EmailInput(value: String, onValueChange: (String) -> Unit, emailErro
         keyboardType = KeyboardType.Email,
         modifier = Modifier.fillMaxWidth()
     )
-    emailError?.let {
-        Text(
-            text = it,
-            color = MaterialTheme.colorScheme.error,
-            style = MaterialTheme.typography.bodySmall
-        )
-    }
+    emailError?.let { ErrorText(it) }
 }
 
 @Composable
@@ -192,13 +194,7 @@ private fun PhoneNumberInput(value: String, onValueChange: (String) -> Unit, pho
         keyboardType = KeyboardType.Phone,
         modifier = Modifier.fillMaxWidth()
     )
-    phoneError?.let {
-        Text(
-            text = it,
-            color = MaterialTheme.colorScheme.error,
-            style = MaterialTheme.typography.bodySmall
-        )
-    }
+    phoneError?.let { ErrorText(it) }
 }
 
 @Composable
@@ -211,13 +207,7 @@ private fun PasswordInput(value: String, onValueChange: (String) -> Unit, passwo
         visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
         modifier = Modifier.fillMaxWidth()
     )
-    passwordError?.let {
-        Text(
-            text = it,
-            color = MaterialTheme.colorScheme.error,
-            style = MaterialTheme.typography.bodySmall
-        )
-    }
+    passwordError?.let { ErrorText(it) }
 }
 
 @Composable
@@ -230,13 +220,16 @@ private fun ConfirmPasswordInput(value: String, onValueChange: (String) -> Unit,
         visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
         modifier = Modifier.fillMaxWidth()
     )
-    confirmPasswordError?.let {
-        Text(
-            text = it,
-            color = MaterialTheme.colorScheme.error,
-            style = MaterialTheme.typography.bodySmall
-        )
-    }
+    confirmPasswordError?.let { ErrorText(it) }
+}
+
+@Composable
+private fun ErrorText(message: String) {
+    Text(
+        text = message,
+        color = MaterialTheme.colorScheme.error,
+        style = MaterialTheme.typography.bodySmall
+    )
 }
 
 

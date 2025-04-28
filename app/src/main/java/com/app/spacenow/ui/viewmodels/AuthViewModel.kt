@@ -1,11 +1,19 @@
 package com.app.spacenow.ui.viewmodels
 
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import java.util.regex.Pattern
-import androidx.lifecycle.ViewModel
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
+
 
 class AuthViewModel : ViewModel() {
+
+    private val auth: FirebaseAuth = FirebaseAuth.getInstance()
+    private val db: FirebaseFirestore = FirebaseFirestore.getInstance()
 
     private val _isAuthenticated = MutableStateFlow(false)
     val isAuthenticated: StateFlow<Boolean> = _isAuthenticated
@@ -13,72 +21,52 @@ class AuthViewModel : ViewModel() {
     private val _errorMessage = MutableStateFlow<String?>(null)
     val errorMessage: StateFlow<String?> = _errorMessage
 
-    private val emailPattern = Pattern.compile(
-        "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$"
-    )
-
     fun login(email: String, password: String) {
-        validateCredentials(email, password)
-    }
-
-    private fun validateCredentials(email: String, password: String) {
-        if (email.isBlank() || password.isBlank()) {
-            _errorMessage.value = "Todos los campos son obligatorios."
-            _isAuthenticated.value = false
-            return
+        viewModelScope.launch {
+            try {
+                val result = auth.signInWithEmailAndPassword(email, password).await()
+                val user = result.user
+                if (user != null && user.isEmailVerified) {
+                    _isAuthenticated.value = true
+                    _errorMessage.value = "Has iniciado sesión correctamente."
+                } else {
+                    _errorMessage.value = "Por favor verifica tu correo electrónico antes de iniciar sesión."
+                    auth.signOut()
+                }
+            } catch (e: Exception) {
+                _errorMessage.value = "Credenciales no válidas. Verifica tu correo y contraseña."
+            }
         }
-
-        if (!emailPattern.matcher(email).matches()) {
-            _errorMessage.value = "Correo electrónico inválido."
-            _isAuthenticated.value = false
-            return
-        }
-
-        if (password.length < 6) {
-            _errorMessage.value = "La contraseña debe tener al menos 6 caracteres."
-            _isAuthenticated.value = false
-            return
-        }
-
-        _errorMessage.value = null
-        _isAuthenticated.value = true
     }
 
     fun register(name: String, lastName: String, email: String, phoneNumber: String, password: String) {
-        validateRegistration(name, lastName, email, phoneNumber, password)
-    }
+        viewModelScope.launch {
+            try {
+                val result = auth.createUserWithEmailAndPassword(email, password).await()
+                val userId = result.user?.uid ?: return@launch
 
-    private fun validateRegistration(name: String, lastName: String, email: String, phoneNumber: String, password: String) {
-        if (name.isBlank() || lastName.isBlank() || email.isBlank() || phoneNumber.isBlank() || password.isBlank()) {
-            _errorMessage.value = "Todos los campos son obligatorios."
-            _isAuthenticated.value = false
-            return
+                val userMap = hashMapOf(
+                    "name" to name,
+                    "lastName" to lastName,
+                    "email" to email,
+                    "phoneNumber" to phoneNumber
+                )
+
+                db.collection("users").document(userId).set(userMap).await()
+
+                // ENVIAR CORREO DE VERIFICACIÓN
+                auth.currentUser?.sendEmailVerification()?.await()
+
+                _isAuthenticated.value = false // Aún no puede entrar hasta verificar
+                _errorMessage.value = "Usuario registrado. Por favor verifica tu correo electrónico."
+            } catch (e: Exception) {
+                _errorMessage.value = e.message ?: "Error al registrar usuario."
+            }
         }
-
-        if (!emailPattern.matcher(email).matches()) {
-            _errorMessage.value = "Correo electrónico inválido."
-            _isAuthenticated.value = false
-            return
-        }
-
-        if (!phoneNumber.matches(Regex("^\\d{10}$"))) {
-            _errorMessage.value = "Número de teléfono inválido."
-            _isAuthenticated.value = false
-            return
-        }
-
-        if (password.length < 6) {
-            _errorMessage.value = "La contraseña debe tener al menos 6 caracteres."
-            _isAuthenticated.value = false
-            return
-        }
-
-        _errorMessage.value = null
-        _isAuthenticated.value = true
     }
 
     fun logout() {
+        auth.signOut()
         _isAuthenticated.value = false
-        _errorMessage.value = null
     }
 }
