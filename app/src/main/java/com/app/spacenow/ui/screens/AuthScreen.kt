@@ -150,7 +150,8 @@ private fun ErrorMessage(message: String) {
     Text(
         text = message,
         color = MaterialTheme.colorScheme.error,
-        style = MaterialTheme.typography.bodyMedium
+        style = MaterialTheme.typography.bodyMedium,
+        textAlign = TextAlign.Center
     )
 }
 

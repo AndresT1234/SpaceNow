@@ -133,6 +133,7 @@ fun RegisterScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
+        /*
         errorMessage?.let {
             Text(
                 text = it,
@@ -142,6 +143,7 @@ fun RegisterScreen(
                 textAlign = TextAlign.Center
             )
         }
+         */
     }
 }
 
