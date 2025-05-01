@@ -6,6 +6,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import com.app.spacenow.ui.components.PasswordVisibilityToggle
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.app.spacenow.ui.components.PrimaryButton
@@ -27,6 +29,8 @@ fun AuthScreen(
 
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+
+    var passwordVisible by remember { mutableStateOf(false) } // Estado para el icono
 
     LaunchedEffect(isAuthenticated) {
         if (isAuthenticated) {
@@ -54,7 +58,12 @@ fun AuthScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        PasswordInput(password) { password = it }
+        PasswordInput(
+            value = password,
+            onValueChange = { password = it },
+            passwordVisible = passwordVisible,
+            onVisibilityToggle = { passwordVisible = !passwordVisible }
+        )
 
         Spacer(modifier = Modifier.height(24.dp))
 
@@ -114,13 +123,24 @@ private fun EmailInput(value: String, onValueChange: (String) -> Unit) {
 }
 
 @Composable
-private fun PasswordInput(value: String, onValueChange: (String) -> Unit) {
-    TextFieldInput(
+private fun PasswordInput(
+    value: String, 
+    onValueChange: (String) -> Unit,
+    passwordVisible: Boolean,
+    onVisibilityToggle: () -> Unit  
+    ) {
+        TextFieldInput(
         value = value,
         onValueChange = onValueChange,
         label = "Contraseña",
         keyboardType = KeyboardType.Password,
-        visualTransformation = PasswordVisualTransformation(),
+        visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+        trailingIcon = {
+            PasswordVisibilityToggle(
+                passwordVisible = passwordVisible,
+                onToggleVisibility = onVisibilityToggle
+            )
+        },
         modifier = Modifier.fillMaxWidth()
     )
 }
