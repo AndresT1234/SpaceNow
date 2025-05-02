@@ -12,7 +12,12 @@ data class Reservation(
 )
 
 enum class ReservationStatus {
+    /** Reserva confirmada. */
     CONFIRMED,
-    CANCELLED,
-    PENDING
+
+    /** Reserva pendiente de confirmación. */
+    PENDING,
+
+    /** Reserva cancelada. */
+    CANCELLED
 }

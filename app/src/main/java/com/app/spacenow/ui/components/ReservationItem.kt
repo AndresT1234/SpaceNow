@@ -20,7 +20,7 @@ fun ReservationItem(
     onDeleteClick: (Reservation) -> Unit
 ) {
     val dateFormatter = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
-    
+
     Card(
         modifier = Modifier
             .fillMaxWidth()

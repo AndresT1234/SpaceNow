@@ -68,5 +68,6 @@ class AuthViewModel : ViewModel() {
     fun logout() {
         auth.signOut()
         _isAuthenticated.value = false
+        _errorMessage.value = "Has cerrado sesión correctamente."
     }
 }
