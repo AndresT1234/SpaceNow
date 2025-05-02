@@ -1,5 +1,6 @@
 package com.app.spacenow.ui.screens
 
+import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -19,6 +20,7 @@ import androidx.navigation.NavHostController
 import com.app.spacenow.R
 import com.app.spacenow.data.model.Space
 import com.app.spacenow.ui.viewmodels.DashboardViewModel
+import com.app.spacenow.ui.viewmodels.AuthViewModel
 import com.app.spacenow.ui.components.*
 import kotlinx.coroutines.launch
 import java.util.*
@@ -26,7 +28,8 @@ import java.util.*
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DashboardScreen(
-    viewModel: DashboardViewModel = viewModel(),
+    viewModel: DashboardViewModel = viewModel(), // DashboardViewModel
+    authViewModel: AuthViewModel = viewModel(), // AuthViewModel
     navController: NavHostController,
     onSpaceClick: (Space) -> Unit
 ) {
@@ -131,8 +134,15 @@ fun DashboardScreen(
                     ),
                     onClick = {
                         scope.launch {
-                            drawerState.close()
-                            // TODO: Implementar lógica de cierre de sesión
+                            try {
+                                drawerState.close() // Cierra el drawer
+                                authViewModel.logout() // Llama a la función logout
+                                navController.navigate("auth") {
+                                    popUpTo(0) { inclusive = true } // Limpia el stack de navegación
+                                }
+                            } catch (e: Exception) {
+                                e.printStackTrace() // Registra cualquier error
+                            }
                         }
                     }
                 )
@@ -270,15 +280,6 @@ fun DashboardScreen(
                             onEditClick = { viewModel.modifyReservation(it.id, Date()) },
                             onDeleteClick = { viewModel.deleteReservation(it.id) }
                         )
-                    }
-                }
-                // Botón para ir a Registro
-                item {
-                    Button(
-                        onClick = { navController.navigate("register") },
-                        modifier = Modifier.padding(16.dp)
-                    ) {
-                        Text("Ir a Registro")
                     }
                 }
             }

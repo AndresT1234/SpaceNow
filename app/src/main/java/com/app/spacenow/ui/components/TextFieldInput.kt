@@ -14,7 +14,8 @@ fun TextFieldInput(
     label: String,
     modifier: Modifier = Modifier,
     keyboardType: KeyboardType = KeyboardType.Text,
-    visualTransformation: VisualTransformation = VisualTransformation.None
+    visualTransformation: VisualTransformation = VisualTransformation.None,
+    trailingIcon: @Composable (() -> Unit)? = null // Icono para mostrar/ocultar contraseña
 ) {
     OutlinedTextField(
         value = value,
@@ -23,6 +24,7 @@ fun TextFieldInput(
         modifier = modifier,
         singleLine = true,
         keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
-        visualTransformation = visualTransformation
+        visualTransformation = visualTransformation,
+        trailingIcon = trailingIcon // Pasar el icono al TextField
     )
 }

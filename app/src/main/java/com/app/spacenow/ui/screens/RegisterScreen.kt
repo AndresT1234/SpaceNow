@@ -13,6 +13,7 @@ import androidx.navigation.NavController
 import com.app.spacenow.ui.utils.ValidationUtils
 import com.app.spacenow.ui.components.PrimaryButton
 import com.app.spacenow.ui.components.TextFieldInput
+import com.app.spacenow.ui.components.PasswordVisibilityToggle
 import com.app.spacenow.ui.viewmodels.AuthViewModel
 
 @Composable
@@ -89,14 +90,20 @@ fun RegisterScreen(
         PasswordInput(value = password, onValueChange = {
             password = it
             passwordError = ValidationUtils.validatePassword(it)
-        }, passwordError = passwordError, passwordVisible = passwordVisible)
+        },
+        passwordError = passwordError, 
+        passwordVisible = passwordVisible, 
+        onVisibilityToggle = { passwordVisible = !passwordVisible })
 
         Spacer(modifier = Modifier.height(8.dp))
 
         ConfirmPasswordInput(value = confirmPassword, onValueChange = {
             confirmPassword = it
             confirmPasswordError = ValidationUtils.validateConfirmPassword(password, it)
-        }, confirmPasswordError = confirmPasswordError, passwordVisible = passwordVisible)
+        },
+        confirmPasswordError = confirmPasswordError, 
+        passwordVisible = passwordVisible,
+        onVisibilityToggle = { passwordVisible = !passwordVisible})
 
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -126,6 +133,7 @@ fun RegisterScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
+        /*
         errorMessage?.let {
             Text(
                 text = it,
@@ -135,6 +143,7 @@ fun RegisterScreen(
                 textAlign = TextAlign.Center
             )
         }
+         */
     }
 }
 
@@ -198,26 +207,34 @@ private fun PhoneNumberInput(value: String, onValueChange: (String) -> Unit, pho
 }
 
 @Composable
-private fun PasswordInput(value: String, onValueChange: (String) -> Unit, passwordError: String?, passwordVisible: Boolean) {
+private fun PasswordInput(value: String, onValueChange: (String) -> Unit, passwordError: String?, passwordVisible: Boolean,
+                            onVisibilityToggle: () -> Unit ) {
     TextFieldInput(
         value = value,
         onValueChange = onValueChange,
         label = "Contraseña",
         keyboardType = KeyboardType.Password,
         visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+        trailingIcon = {
+            PasswordVisibilityToggle(passwordVisible, onVisibilityToggle) // Icono para mostrar/ocultar contraseña
+        },
         modifier = Modifier.fillMaxWidth()
     )
     passwordError?.let { ErrorText(it) }
 }
 
 @Composable
-private fun ConfirmPasswordInput(value: String, onValueChange: (String) -> Unit, confirmPasswordError: String?, passwordVisible: Boolean) {
+private fun ConfirmPasswordInput(value: String, onValueChange: (String) -> Unit, confirmPasswordError: String?, passwordVisible: Boolean,
+                                  onVisibilityToggle: () -> Unit) {
     TextFieldInput(
         value = value,
         onValueChange = onValueChange,
         label = "Confirmar Contraseña",
         keyboardType = KeyboardType.Password,
         visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+        trailingIcon = {
+            PasswordVisibilityToggle(passwordVisible, onVisibilityToggle) // Icono para mostrar/ocultar contraseña
+        },
         modifier = Modifier.fillMaxWidth()
     )
     confirmPasswordError?.let { ErrorText(it) }
