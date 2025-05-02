@@ -12,7 +12,7 @@ import kotlinx.coroutines.launch
 import java.util.Date
 
 class DashboardViewModel : ViewModel() {
-    private val _spaces = MutableStateFlow<List<Space>>(emptyList())
+    val _spaces = MutableStateFlow<List<Space>>(emptyList())
     val spaces: StateFlow<List<Space>> = _spaces.asStateFlow()
 
     private val _reservations = MutableStateFlow<List<Reservation>>(emptyList())

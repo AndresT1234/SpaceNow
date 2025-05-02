@@ -13,7 +13,7 @@ import java.util.*
 @Composable
 fun AdminReservationItem(reservation: Reservation) {
     val dateFormatter = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
-    
+
     Card(
         modifier = Modifier
             .fillMaxWidth()

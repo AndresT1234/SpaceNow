@@ -1,62 +1,83 @@
 package com.app.spacenow.ui.screens
 
-import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.app.spacenow.R
 import com.app.spacenow.data.model.Space
-import com.app.spacenow.ui.viewmodels.DashboardViewModel
+import com.app.spacenow.data.model.Reservation
+import com.app.spacenow.ui.components.AdminReservationItem
+import com.app.spacenow.ui.components.ReservationItem
+import com.app.spacenow.ui.components.SpaceCard
+import com.app.spacenow.ui.components.StatisticsChart
 import com.app.spacenow.ui.viewmodels.AuthViewModel
-import com.app.spacenow.ui.components.*
+import com.app.spacenow.ui.viewmodels.DashboardViewModel
 import kotlinx.coroutines.launch
-import java.util.*
+import java.util.Date
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DashboardScreen(
-    viewModel: DashboardViewModel = viewModel(), // DashboardViewModel
-    authViewModel: AuthViewModel = viewModel(), // AuthViewModel
     navController: NavHostController,
-    onSpaceClick: (Space) -> Unit
+    dashboardViewModel: DashboardViewModel = viewModel(),
+    authViewModel: AuthViewModel = viewModel()
 ) {
-    val spaces by viewModel.spaces.collectAsState()
-    val reservations by viewModel.reservations.collectAsState()
-    val allActiveReservations by viewModel.allActiveReservations.collectAsState()
-    val spaceStatistics by viewModel.spaceStatistics.collectAsState()
-    val isLoading by viewModel.isLoading.collectAsState()
-    val isAdmin by viewModel.isAdmin.collectAsState()
-    
-    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+    // Auth state: auto-navigate to login when logged out
+    val isAuthenticated by authViewModel.isAuthenticated.collectAsState()
+    LaunchedEffect(isAuthenticated) {
+        if (!isAuthenticated) {
+            navController.navigate("auth") {
+                popUpTo("dashboard") { inclusive = true }
+            }
+        }
+    }
+
+    // Dashboard state collectors
+    val spaces by dashboardViewModel.spaces.collectAsState()
+    val reservations by dashboardViewModel.reservations.collectAsState()
+    val allActiveReservations by dashboardViewModel.allActiveReservations.collectAsState()
+    val spaceStatistics by dashboardViewModel.spaceStatistics.collectAsState()
+    val isLoading by dashboardViewModel.isLoading.collectAsState()
+    val isAdmin by dashboardViewModel.isAdmin.collectAsState()
+
+    // Drawer and scrolling
+    val drawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
-    val lazyListState = rememberLazyListState()
+    val listState = rememberLazyListState()
 
-    // Referencias para el scroll
-    val availableSpacesRef = remember { mutableStateOf(0) }
-    val myReservationsRef = remember { mutableStateOf(0) }
-    val activeReservationsRef = remember { mutableStateOf(0) }
-    val statisticsRef = remember { mutableStateOf(0) }
+    // Dialog & selection
+    var showLogoutDialog by remember { mutableStateOf(false) }
+    var selectedItem by remember { mutableStateOf(if (isAdmin) "active" else "spaces") }
 
-    var selectedItem by remember { mutableStateOf("spaces") }
+    // Scroll anchors
+    val spacesRef = remember { mutableStateOf(0) }
+    val reservedRef = remember { mutableStateOf(0) }
+    val activeRef = remember { mutableStateOf(0) }
+    val statsRef = remember { mutableStateOf(0) }
 
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
             ModalDrawerSheet {
                 Spacer(Modifier.height(16.dp))
+
                 if (isAdmin) {
                     NavigationDrawerItem(
                         label = { Text("Reservas activas") },
@@ -65,30 +86,20 @@ fun DashboardScreen(
                             scope.launch {
                                 selectedItem = "active"
                                 drawerState.close()
-                                lazyListState.scrollToItem(activeReservationsRef.value)
+                                listState.scrollToItem(activeRef.value)
                             }
-                        },
-                        colors = NavigationDrawerItemDefaults.colors(
-                            selectedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
-                            selectedTextColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                            selectedIconColor = MaterialTheme.colorScheme.onSecondaryContainer
-                        )
+                        }
                     )
                     NavigationDrawerItem(
-                        label = { Text("Frecuencia de reservas") },
+                        label = { Text("Estadísticas") },
                         selected = selectedItem == "stats",
                         onClick = {
                             scope.launch {
                                 selectedItem = "stats"
                                 drawerState.close()
-                                lazyListState.scrollToItem(statisticsRef.value)
+                                listState.scrollToItem(statsRef.value)
                             }
-                        },
-                        colors = NavigationDrawerItemDefaults.colors(
-                            selectedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
-                            selectedTextColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                            selectedIconColor = MaterialTheme.colorScheme.onSecondaryContainer
-                        )
+                        }
                     )
                 } else {
                     NavigationDrawerItem(
@@ -98,33 +109,25 @@ fun DashboardScreen(
                             scope.launch {
                                 selectedItem = "spaces"
                                 drawerState.close()
-                                lazyListState.scrollToItem(availableSpacesRef.value)
+                                listState.scrollToItem(spacesRef.value)
                             }
-                        },
-                        colors = NavigationDrawerItemDefaults.colors(
-                            selectedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
-                            selectedTextColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                            selectedIconColor = MaterialTheme.colorScheme.onSecondaryContainer
-                        )
+                        }
                     )
                     NavigationDrawerItem(
-                        label = { Text("Mis espacios reservados") },
+                        label = { Text("Mis Reservas") },
                         selected = selectedItem == "reservations",
                         onClick = {
                             scope.launch {
                                 selectedItem = "reservations"
                                 drawerState.close()
-                                lazyListState.scrollToItem(myReservationsRef.value)
+                                listState.scrollToItem(reservedRef.value)
                             }
-                        },
-                        colors = NavigationDrawerItemDefaults.colors(
-                            selectedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
-                            selectedTextColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                            selectedIconColor = MaterialTheme.colorScheme.onSecondaryContainer
-                        )
+                        }
                     )
                 }
+
                 Spacer(Modifier.weight(1f))
+
                 NavigationDrawerItem(
                     label = { Text("Cerrar sesión") },
                     selected = false,
@@ -132,20 +135,29 @@ fun DashboardScreen(
                         unselectedIconColor = MaterialTheme.colorScheme.error,
                         unselectedTextColor = MaterialTheme.colorScheme.error
                     ),
-                    onClick = {
-                        scope.launch {
-                            try {
-                                drawerState.close() // Cierra el drawer
-                                authViewModel.logout() // Llama a la función logout
-                                navController.navigate("auth") {
-                                    popUpTo(0) { inclusive = true } // Limpia el stack de navegación
-                                }
-                            } catch (e: Exception) {
-                                e.printStackTrace() // Registra cualquier error
-                            }
-                        }
-                    }
+                    onClick = { showLogoutDialog = true }
                 )
+
+                if (showLogoutDialog) {
+                    AlertDialog(
+                        onDismissRequest = { showLogoutDialog = false },
+                        title = { Text("Confirmación", style = TextStyle(fontSize = 20.sp)) },
+                        text = { Text("¿Deseas cerrar sesión?") },
+                        confirmButton = {
+                            TextButton(onClick = {
+                                showLogoutDialog = false
+                                scope.launch {
+                                    drawerState.close()
+                                    authViewModel.logout()
+                                }
+                            }) { Text("Aceptar") }
+                        },
+                        dismissButton = {
+                            TextButton(onClick = { showLogoutDialog = false }) { Text("Cancelar") }
+                        }
+                    )
+                }
+
                 Spacer(Modifier.height(16.dp))
             }
         }
@@ -154,131 +166,102 @@ fun DashboardScreen(
             topBar = {
                 TopAppBar(
                     title = {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
                             Icon(
-                                painter = painterResource(id = R.drawable.ic_logo),
-                                contentDescription = "SpaceNow Logo",
+                                painter = painterResource(R.drawable.ic_logo),
+                                contentDescription = null,
                                 modifier = Modifier.size(32.dp)
                             )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text("SpaceNow")
+                            Spacer(Modifier.width(8.dp))
+                            Text("SpaceNow", fontWeight = FontWeight.Bold)
                         }
                     },
                     navigationIcon = {
-                        IconButton(onClick = {
-                            scope.launch {
-                                drawerState.open()
-                            }
-                        }) {
-                            Icon(Icons.Default.Menu, contentDescription = "Menu")
+                        IconButton(onClick = { scope.launch { drawerState.open() } }) {
+                            Icon(Icons.Filled.Menu, contentDescription = null)
                         }
                     }
                 )
             }
-        ) { paddingValues ->
+        ) { padding ->
             LazyColumn(
-                state = lazyListState,
+                state = listState,
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(paddingValues)
+                    .padding(padding)
                     .padding(8.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 if (isAdmin) {
-                    // Admin Dashboard Content
                     item {
                         Text(
                             text = "Reservas activas",
-                            style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                            style = MaterialTheme.typography.titleLarge,
                             modifier = Modifier
                                 .padding(vertical = 8.dp)
-                                .onGloballyPositioned { coordinates ->
-                                    activeReservationsRef.value = 0
-                                }
+                                .onGloballyPositioned { activeRef.value = 0 }
                         )
                     }
-
-                    items(allActiveReservations) { reservation -> 
-                        AdminReservationItem(reservation = reservation)
+                    items(allActiveReservations) { res ->
+                        AdminReservationItem(reservation = res)
                     }
-
                     item {
                         Text(
-                            text = "Estadísticas de reservas",
-                            style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                            text = "Estadísticas",
+                            style = MaterialTheme.typography.titleLarge,
                             modifier = Modifier
                                 .padding(vertical = 8.dp)
-                                .onGloballyPositioned { coordinates ->
-                                    statisticsRef.value = allActiveReservations.size + 1
-                                }
+                                .onGloballyPositioned { statsRef.value = allActiveReservations.size + 1 }
                         )
                     }
-
-                    item {
-                        StatisticsChart(spaceStatistics = spaceStatistics)
-                    }
+                    item { StatisticsChart(spaceStatistics) }
                 } else {
-                    // Regular User Dashboard Content
                     item {
                         Text(
                             text = "Espacios disponibles",
-                            style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                            style = MaterialTheme.typography.titleLarge,
                             modifier = Modifier
                                 .padding(vertical = 8.dp)
-                                .onGloballyPositioned { coordinates ->
-                                    availableSpacesRef.value = 0
-                                }
+                                .onGloballyPositioned { spacesRef.value = 0 }
                         )
                     }
-
                     if (isLoading) {
                         item {
-                            Box(
-                                modifier = Modifier.fillMaxWidth(),
-                                contentAlignment = Alignment.Center
-                            ) {
+                            Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                                 CircularProgressIndicator()
                             }
                         }
                     } else {
-                        items(spaces.chunked(2)) { spaceRow ->
+                        items(spaces.chunked(2)) { row ->
                             Row(
-                                modifier = Modifier.fillMaxWidth(),
+                                Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
-                                spaceRow.forEach { space ->
+                                row.forEach { space ->
                                     SpaceCard(
                                         space = space,
-                                        onSpaceClick = onSpaceClick,
+                                        onSpaceClick = { /* TODO: navegar a detalle */ },
                                         modifier = Modifier.weight(1f)
                                     )
                                 }
-                                if (spaceRow.size == 1) {
-                                    Spacer(modifier = Modifier.weight(1f))
-                                }
+                                if (row.size == 1) Spacer(Modifier.weight(1f))
                             }
                         }
                     }
-
                     item {
                         Text(
-                            text = "Mis espacios reservados",
-                            style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                            text = "Mis Reservas",
+                            style = MaterialTheme.typography.titleLarge,
                             modifier = Modifier
                                 .padding(vertical = 8.dp)
-                                .onGloballyPositioned { coordinates ->
-                                    myReservationsRef.value = spaces.size + 2
-                                }
+                                .onGloballyPositioned { reservedRef.value = spaces.size + 2 }
                         )
                     }
-
-                    items(reservations) { reservation ->
+                    items(reservations) { res ->
                         ReservationItem(
-                            reservation = reservation,
-                            onEditClick = { viewModel.modifyReservation(it.id, Date()) },
-                            onDeleteClick = { viewModel.deleteReservation(it.id) }
+                            reservation = res,
+                            onEditClick = { dashboardViewModel.modifyReservation(res.id, Date()) },
+                            onDeleteClick = { dashboardViewModel.deleteReservation(res.id) }
                         )
                     }
                 }
@@ -286,3 +269,5 @@ fun DashboardScreen(
         }
     }
 }
+
+
