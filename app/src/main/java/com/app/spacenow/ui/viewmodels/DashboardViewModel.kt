@@ -36,11 +36,25 @@ class DashboardViewModel : ViewModel() {
     }
 
     init {
+        viewModelScope.launch {
+            isAdmin.collect { isAdmin ->
+                if (isAdmin) {
+                    loadAllActiveReservations()
+                    calculateSpaceStatistics()
+                }
+            }
+        }
         loadMockSpaces()
         loadMockReservations()
-        if (isAdmin.value) {
-            loadAllActiveReservations()
-            calculateSpaceStatistics()
+    }
+
+    fun updateAdminStatus(authViewModel: AuthViewModel) {
+        viewModelScope.launch {
+            authViewModel.userRole.collect { role ->
+                val isAdminValue = role == "admin"
+                println("updateAdminStatus: userRole = $role, isAdmin = $isAdminValue")
+                _isAdmin.value = isAdminValue
+            }
         }
     }
 

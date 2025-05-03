@@ -17,6 +17,7 @@ import androidx.navigation.compose.rememberNavController
 import com.app.spacenow.ui.screens.AuthScreen
 import com.app.spacenow.ui.screens.DashboardScreen
 import com.app.spacenow.ui.screens.RegisterScreen
+import com.app.spacenow.ui.screens.PromoteUserScreen
 import com.app.spacenow.ui.theme.SpaceNowTheme
 import com.app.spacenow.ui.viewmodels.AuthViewModel
 
@@ -26,7 +27,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            // Observamos el estado de autenticación desde el ViewModel
+
             val isAuthenticated by authViewModel.isAuthenticated.collectAsState()
             val navController = rememberNavController()
 
@@ -49,6 +50,12 @@ class MainActivity : ComponentActivity() {
                         composable("dashboard") {
                             DashboardScreen(
                                 navController = navController,
+                                authViewModel = authViewModel
+                            )
+                        }
+
+                        composable("promote-users") {
+                            PromoteUserScreen(
                                 authViewModel = authViewModel
                             )
                         }

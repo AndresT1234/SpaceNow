@@ -39,8 +39,15 @@ fun DashboardScreen(
     dashboardViewModel: DashboardViewModel = viewModel(),
     authViewModel: AuthViewModel = viewModel()
 ) {
-    // Auth state: auto-navigate to login when logged out
+
     val isAuthenticated by authViewModel.isAuthenticated.collectAsState()
+
+
+    LaunchedEffect(Unit) {
+        println("DashboardScreen: Llamando a updateAdminStatus")
+        dashboardViewModel.updateAdminStatus(authViewModel)
+    }
+
     LaunchedEffect(isAuthenticated) {
         if (!isAuthenticated) {
             navController.navigate("auth") {
@@ -72,6 +79,8 @@ fun DashboardScreen(
     val activeRef = remember { mutableStateOf(0) }
     val statsRef = remember { mutableStateOf(0) }
 
+
+
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
@@ -101,6 +110,20 @@ fun DashboardScreen(
                             }
                         }
                     )
+
+                    NavigationDrawerItem(
+                        label = { Text("Promover Usuarios") },
+                        selected = selectedItem == "promote",
+                        onClick = {
+                            scope.launch {
+                                selectedItem = "promote"
+                                drawerState.close()
+                                navController.navigate("promote-users")
+                            }
+                        }
+                    )
+
+
                 } else {
                     NavigationDrawerItem(
                         label = { Text("Espacios disponibles") },
