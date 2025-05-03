@@ -240,7 +240,9 @@ fun DashboardScreen(
                                 row.forEach { space ->
                                     SpaceCard(
                                         space = space,
-                                        onSpaceClick = { /* TODO: navegar a detalle */ },
+                                        onSpaceClick = { 
+                                            navController.navigate("reservation-form?spaceId=${space.id}")
+                                        },
                                         modifier = Modifier.weight(1f)
                                     )
                                 }
@@ -260,7 +262,9 @@ fun DashboardScreen(
                     items(reservations) { res ->
                         ReservationItem(
                             reservation = res,
-                            onEditClick = { dashboardViewModel.modifyReservation(res.id, Date()) },
+                            onEditClick = { 
+                                navController.navigate("reservation-form?reservationId=${res.id}")
+                            },
                             onDeleteClick = { dashboardViewModel.deleteReservation(res.id) }
                         )
                     }
