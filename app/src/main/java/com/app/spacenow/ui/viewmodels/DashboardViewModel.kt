@@ -178,6 +178,17 @@ class DashboardViewModel : ViewModel() {
         }
     }
 
+    fun addReservation(reservation: Reservation) {
+        val currentReservations = _reservations.value.toMutableList()
+        currentReservations.add(reservation)
+        _reservations.value = currentReservations
+
+        // Actualizar estadísticas si es admin
+        if (isAdmin.value) {
+            calculateSpaceStatistics()
+        }
+    }
+
     override fun onCleared() {
         super.onCleared()
         // Clean up any resources if needed
