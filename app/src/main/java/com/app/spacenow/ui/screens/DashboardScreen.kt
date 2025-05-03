@@ -307,7 +307,7 @@ fun DashboardScreen(
                                     SpaceCard(
                                         space = space,
                                         onSpaceClick = { 
-                                            navController.navigate("reservation-form?spaceId=${space.id}")
+                                            navController.navigate("form?spaceId=${space.id}&mode=reservation")
                                         },
                                         modifier = Modifier.weight(1f)
                                     )
@@ -329,7 +329,7 @@ fun DashboardScreen(
                         ReservationItem(
                             reservation = res,
                             onEditClick = { 
-                                navController.navigate("reservation-form?reservationId=${res.id}")
+                                navController.navigate("form?reservationId=${res.id}&mode=reservation")
                             },
                             onDeleteClick = { dashboardViewModel.deleteReservation(res.id) }
                         )
