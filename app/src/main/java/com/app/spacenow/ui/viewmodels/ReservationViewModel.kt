@@ -24,6 +24,8 @@ class ReservationViewModel : ViewModel() {
     private val _errorMessage = MutableStateFlow<String?>(null)
     val errorMessage: StateFlow<String?> = _errorMessage.asStateFlow()
 
+    lateinit var dashboardViewModel: DashboardViewModel
+
     fun setSelectedSpace(space: Space) {
         _selectedSpace.value = space
     }
@@ -41,9 +43,8 @@ class ReservationViewModel : ViewModel() {
             return false
         }
 
-        // Aquí iría la lógica para crear la reserva en el backend
         val reservation = Reservation(
-            id = System.currentTimeMillis().toString(), // Temporal, debería venir del backend
+            id = System.currentTimeMillis().toString(),
             spaceId = space.id,
             spaceName = space.name,
             userId = userId,
@@ -51,6 +52,12 @@ class ReservationViewModel : ViewModel() {
             status = ReservationStatus.PENDING
         )
 
+        // Actualizar la lista de reservas en el DashboardViewModel
+        if (::dashboardViewModel.isInitialized) {
+            dashboardViewModel.addReservation(reservation)
+        }
+
+        clearForm()
         return true
     }
 

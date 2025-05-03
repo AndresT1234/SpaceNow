@@ -29,6 +29,10 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Conectar ViewModels
+        reservationViewModel.dashboardViewModel = dashboardViewModel
+        
         setContent {
             val isAuthenticated by authViewModel.isAuthenticated.collectAsState()
             val navController = rememberNavController()
