@@ -104,6 +104,18 @@ fun DashboardScreen(
                     )
                 } else {
                     NavigationDrawerItem(
+                        label = { Text("Nueva Reserva") },
+                        selected = false,
+                        icon = { Icon(Icons.Default.Add, contentDescription = null) },
+                        onClick = {
+                            scope.launch {
+                                drawerState.close()
+                                navController.navigate("form?mode=reservation")
+                            }
+                        }
+                    )
+                    
+                    NavigationDrawerItem(
                         label = { Text("Espacios disponibles") },
                         selected = selectedItem == "spaces",
                         onClick = {
@@ -192,6 +204,15 @@ fun DashboardScreen(
                         }
                     }
                 )
+            },
+            floatingActionButton = {
+                if (!isAdmin) {
+                    FloatingActionButton(
+                        onClick = { navController.navigate("form?mode=reservation") }
+                    ) {
+                        Icon(Icons.Default.Add, contentDescription = "Nueva Reserva")
+                    }
+                }
             }
         ) { padding ->
             LazyColumn(

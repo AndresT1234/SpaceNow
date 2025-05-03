@@ -125,6 +125,11 @@ fun FormScreen(
                 )
             } else {
                 // Formulario de Reserva
+                Text(
+                    text = "¿Qué espacio quieres reservar?",
+                    style = MaterialTheme.typography.titleMedium
+                )
+
                 if (space == null) {
                     SpaceSelector(
                         selectedSpace = selectedSpace,
@@ -139,6 +144,11 @@ fun FormScreen(
                         style = MaterialTheme.typography.titleMedium
                     )
                 }
+
+                Text(
+                    text = "¿Cuándo lo quieres usar?",
+                    style = MaterialTheme.typography.titleMedium
+                )
 
                 DateTimeSelector(
                     selectedDate = selectedDate,
