@@ -19,11 +19,13 @@ import com.app.spacenow.ui.theme.SpaceNowTheme
 import com.app.spacenow.ui.viewmodels.AuthViewModel
 import com.app.spacenow.ui.viewmodels.DashboardViewModel
 import com.app.spacenow.ui.viewmodels.ReservationViewModel
+import com.app.spacenow.ui.viewmodels.SpaceViewModel
 
 class MainActivity : ComponentActivity() {
     private val authViewModel: AuthViewModel by viewModels()
     private val dashboardViewModel: DashboardViewModel by viewModels()
     private val reservationViewModel: ReservationViewModel by viewModels()
+    private val spaceViewModel: SpaceViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,6 +36,7 @@ class MainActivity : ComponentActivity() {
             // Collect states
             val spaces by dashboardViewModel.spaces.collectAsState()
             val reservations by dashboardViewModel.reservations.collectAsState()
+            val isAdmin by dashboardViewModel.isAdmin.collectAsState()
 
             SpaceNowTheme {
                 Surface(
@@ -66,8 +69,9 @@ class MainActivity : ComponentActivity() {
                             )
                         }
 
+                        // Ruta unificada para formularios de espacios y reservas
                         composable(
-                            route = "reservation-form?spaceId={spaceId}&reservationId={reservationId}",
+                            route = "form?spaceId={spaceId}&reservationId={reservationId}&mode={mode}",
                             arguments = listOf(
                                 navArgument("spaceId") { 
                                     type = NavType.StringType
@@ -76,11 +80,16 @@ class MainActivity : ComponentActivity() {
                                 navArgument("reservationId") { 
                                     type = NavType.StringType
                                     nullable = true 
+                                },
+                                navArgument("mode") {
+                                    type = NavType.StringType
+                                    defaultValue = "reservation"
                                 }
                             )
                         ) { backStackEntry ->
                             val spaceId = backStackEntry.arguments?.getString("spaceId")
                             val reservationId = backStackEntry.arguments?.getString("reservationId")
+                            val mode = backStackEntry.arguments?.getString("mode") ?: "reservation"
                             
                             val space = spaceId?.let { id ->
                                 spaces.find { it.id == id }
@@ -90,11 +99,13 @@ class MainActivity : ComponentActivity() {
                                 reservations.find { it.id == id }
                             }
 
-                            ReservationFormScreen(
+                            FormScreen(
                                 navController = navController,
+                                isAdmin = mode == "space",
                                 space = space,
                                 existingReservation = reservation,
-                                reservationViewModel = reservationViewModel
+                                reservationViewModel = reservationViewModel,
+                                spaceViewModel = spaceViewModel
                             )
                         }
                     }

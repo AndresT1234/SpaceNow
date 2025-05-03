@@ -4,14 +4,14 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.clickable
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
@@ -27,6 +27,7 @@ import com.app.spacenow.ui.components.AdminReservationItem
 import com.app.spacenow.ui.components.ReservationItem
 import com.app.spacenow.ui.components.SpaceCard
 import com.app.spacenow.ui.components.StatisticsChart
+import com.app.spacenow.ui.theme.AvailableGreen
 import com.app.spacenow.ui.viewmodels.AuthViewModel
 import com.app.spacenow.ui.viewmodels.DashboardViewModel
 import kotlinx.coroutines.launch
@@ -180,6 +181,15 @@ fun DashboardScreen(
                         IconButton(onClick = { scope.launch { drawerState.open() } }) {
                             Icon(Icons.Filled.Menu, contentDescription = null)
                         }
+                    },
+                    actions = {
+                        if (isAdmin) {
+                            IconButton(onClick = { 
+                                navController.navigate("form?mode=space") 
+                            }) {
+                                Icon(Icons.Default.Add, contentDescription = "Agregar espacio")
+                            }
+                        }
                     }
                 )
             }
@@ -215,6 +225,62 @@ fun DashboardScreen(
                         )
                     }
                     item { StatisticsChart(spaceStatistics) }
+                    item {
+                        Text(
+                            text = "Gestión de Espacios",
+                            style = MaterialTheme.typography.titleLarge,
+                            modifier = Modifier.padding(vertical = 8.dp)
+                        )
+                    }
+                    items(spaces) { space ->
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { 
+                                    navController.navigate("form?spaceId=${space.id}&mode=space")
+                                }
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(
+                                        text = space.name,
+                                        style = MaterialTheme.typography.titleMedium
+                                    )
+                                    Text(
+                                        text = "Capacidad: ${space.capacity} personas",
+                                        style = MaterialTheme.typography.bodyMedium
+                                    )
+                                    if (space.available) {
+                                        Surface(
+                                            color = AvailableGreen,
+                                            shape = MaterialTheme.shapes.small,
+                                            modifier = Modifier.padding(top = 8.dp)
+                                        ) {
+                                            Text(
+                                                text = "Disponible",
+                                                color = Color.White,
+                                                style = MaterialTheme.typography.labelMedium,
+                                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                                            )
+                                        }
+                                    }
+                                }
+                                IconButton(
+                                    onClick = { 
+                                        navController.navigate("form?spaceId=${space.id}&mode=space")
+                                    }
+                                ) {
+                                    Icon(Icons.Default.Edit, contentDescription = "Editar espacio")
+                                }
+                            }
+                        }
+                    }
                 } else {
                     item {
                         Text(
