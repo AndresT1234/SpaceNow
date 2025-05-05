@@ -16,10 +16,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.app.spacenow.ui.screens.*
 import com.app.spacenow.ui.theme.SpaceNowTheme
-import com.app.spacenow.ui.viewmodels.AuthViewModel
-import com.app.spacenow.ui.viewmodels.DashboardViewModel
-import com.app.spacenow.ui.viewmodels.ReservationViewModel
-import com.app.spacenow.ui.viewmodels.SpaceViewModel
+import com.app.spacenow.ui.viewmodels.*
 
 class MainActivity : ComponentActivity() {
     private val authViewModel: AuthViewModel by viewModels()
@@ -28,9 +25,8 @@ class MainActivity : ComponentActivity() {
     private val spaceViewModel: SpaceViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
 
-        // Conectar ViewModels
+        super.onCreate(savedInstanceState)
         reservationViewModel.dashboardViewModel = dashboardViewModel
         
         setContent {
@@ -54,7 +50,8 @@ class MainActivity : ComponentActivity() {
                         composable("auth") {
                             AuthScreen(
                                 navController = navController,
-                                authViewModel = authViewModel
+                                authViewModel = authViewModel,
+
                             )
                         }
 
@@ -69,6 +66,12 @@ class MainActivity : ComponentActivity() {
                         composable("register") {
                             RegisterScreen(
                                 navController = navController,
+                                authViewModel = authViewModel
+                            )
+                        }
+
+                        composable("promote-users") {
+                            PromoteUserScreen(
                                 authViewModel = authViewModel
                             )
                         }
