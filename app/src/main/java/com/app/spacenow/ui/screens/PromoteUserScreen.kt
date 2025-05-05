@@ -7,6 +7,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.app.spacenow.data.model.User
 import com.app.spacenow.ui.viewmodels.AuthViewModel
@@ -32,8 +33,14 @@ fun PromoteUserScreen(authViewModel: AuthViewModel) {
         }
     }
 
-    Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-        Text("Promover Usuarios a Administradores", style = MaterialTheme.typography.titleLarge)
+    Column(modifier = Modifier.fillMaxSize().padding(20.dp)) {
+
+        Spacer(modifier = Modifier.height(10.dp))
+
+        Title()
+
+        Spacer(modifier = Modifier.height(24.dp))
+
         LazyColumn(modifier = Modifier.fillMaxSize()) {
             items(users) { user ->
                 Row(
@@ -56,4 +63,14 @@ fun PromoteUserScreen(authViewModel: AuthViewModel) {
             Text(it, color = MaterialTheme.colorScheme.error)
         }
     }
+}
+
+@Composable
+private fun Title() {
+    Text(
+        text = "Promover Users a Admins",
+        style = MaterialTheme.typography.headlineMedium,
+        modifier = Modifier.fillMaxWidth(),
+        textAlign = TextAlign.Center
+    )
 }

@@ -30,7 +30,7 @@ fun AuthScreen(
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
 
-    var passwordVisible by remember { mutableStateOf(false) } // Estado para el icono
+    var passwordVisible by remember { mutableStateOf(false) }
 
     LaunchedEffect(isAuthenticated) {
         if (isAuthenticated) {

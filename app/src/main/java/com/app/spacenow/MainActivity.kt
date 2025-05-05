@@ -50,7 +50,8 @@ class MainActivity : ComponentActivity() {
                         composable("auth") {
                             AuthScreen(
                                 navController = navController,
-                                authViewModel = authViewModel
+                                authViewModel = authViewModel,
+
                             )
                         }
 

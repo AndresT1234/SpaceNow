@@ -4,12 +4,24 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.MutableStateFlow.*
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
+// Define user roles as an enum class
+enum class UserRole {
+    USER, ADMIN
+}
+data class UserData(val isAuthenticated: Boolean = false, val role: UserRole = UserRole.USER)
+
+
 class AuthViewModel : ViewModel() {
+
+    private val _userData = MutableStateFlow(UserData())
+    val userData: StateFlow<UserData> = _userData.asStateFlow()
+
+
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
     val db: FirebaseFirestore = FirebaseFirestore.getInstance()
 
@@ -21,6 +33,9 @@ class AuthViewModel : ViewModel() {
 
     private val _userRole = MutableStateFlow<String?>(null)
     val userRole: StateFlow<String?> = _userRole
+
+    private val _isLoggingOut = MutableStateFlow(false)
+    val isLoggingOut: StateFlow<Boolean> = _isLoggingOut
 
     fun promoteToAdmin(userId: String) {
         if (_userRole.value != "admin") {
@@ -57,9 +72,11 @@ class AuthViewModel : ViewModel() {
                 val user = result.user
                 if (user != null && user.isEmailVerified) {
                     _isAuthenticated.value = true
-                    _errorMessage.value = "Haas iniciado sesión coreectamente."
+                    _errorMessage.value = "Haas iniciado sesión correctamente."
 
                     fetchUserRole(user.uid)
+                    _userData.value = UserData(isAuthenticated = true, role = UserRole.USER)
+
                 } else {
                     _errorMessage.value = "Por favor verifica tu correo electrónico antes de iniciar sesión."
                     auth.signOut()
@@ -98,8 +115,16 @@ class AuthViewModel : ViewModel() {
     }
 
     fun logout() {
-        auth.signOut()
-        _isAuthenticated.value = false
-        _errorMessage.value = "Has cerrado sesión correctamente."
+        viewModelScope.launch {
+            _isLoggingOut.value = true
+            try {
+                auth.signOut()
+                _userData.value = UserData(isAuthenticated = true, role = UserRole.USER)
+                _isAuthenticated.value = false
+                _userRole.value = null
+            } finally {
+                _isLoggingOut.value = false
+            }
+        }
     }
 }

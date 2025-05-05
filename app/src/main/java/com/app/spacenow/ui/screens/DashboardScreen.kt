@@ -40,7 +40,7 @@ fun DashboardScreen(
     dashboardViewModel: DashboardViewModel = viewModel(),
     authViewModel: AuthViewModel = viewModel()
 ) {
-    // Auth state: auto-navigate to login when logged out
+
     val isAuthenticated by authViewModel.isAuthenticated.collectAsState()
 
     LaunchedEffect(Unit) {
