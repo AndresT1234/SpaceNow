@@ -42,6 +42,11 @@ fun DashboardScreen(
 ) {
     // Auth state: auto-navigate to login when logged out
     val isAuthenticated by authViewModel.isAuthenticated.collectAsState()
+
+    LaunchedEffect(Unit) {
+        dashboardViewModel.updateAdminStatus(authViewModel)
+    }
+
     LaunchedEffect(isAuthenticated) {
         if (!isAuthenticated) {
             navController.navigate("auth") {
@@ -102,6 +107,19 @@ fun DashboardScreen(
                             }
                         }
                     )
+
+                    NavigationDrawerItem(
+                        label = { Text("Promover Usuarios") },
+                        selected = selectedItem == "promote",
+                        onClick = {
+                            scope.launch {
+                                selectedItem = "promote"
+                                drawerState.close()
+                                navController.navigate("promote-users")
+                            }
+                        }
+                    )
+
                 } else {
                     NavigationDrawerItem(
                         label = { Text("Nueva Reserva") },
@@ -248,11 +266,18 @@ fun DashboardScreen(
                     item { StatisticsChart(spaceStatistics) }
                     item {
                         Text(
-                            text = "Gestión de Espacios",
+                            text = "Espacios disponibles",
                             style = MaterialTheme.typography.titleLarge,
-                            modifier = Modifier.padding(vertical = 8.dp)
+                            modifier = Modifier
+                                .padding(vertical = 8.dp)
+                                .onGloballyPositioned { spacesRef.value = 0 }
                         )
                     }
+
+
+
+
+
                     items(spaces) { space ->
                         Card(
                             modifier = Modifier
