@@ -37,13 +37,13 @@ class DashboardViewModel : ViewModel() {
         viewModelScope.launch {
             _isAdmin.collect { isAdmin ->
                 if (isAdmin) {
-                    loadAllActiveReservations()
+                    loadAllActiveReservations() //Carga reservas de manera predeterminada
                     calculateSpaceStatistics()
                 }
             }
         }
         loadMockSpaces()
-        loadMockReservations()
+        //loadMockReservations() //Carga reservas de manera predeterminada
     }
 
     fun updateAdminStatus(authViewModel: AuthViewModel) {

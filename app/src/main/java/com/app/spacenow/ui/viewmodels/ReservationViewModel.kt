@@ -64,6 +64,15 @@ class ReservationViewModel : ViewModel() {
     fun updateReservation(reservation: Reservation): Boolean {
         val date = _selectedDate.value ?: return false
 
+        // Crear una copia de la reserva con la nueva fecha
+        val updatedReservation = reservation.copy(dateTime = date)
+
+        // Actualizar la lista de reservas en el DashboardViewModel
+        if (::dashboardViewModel.isInitialized) {
+            dashboardViewModel.modifyReservation(reservation.id, date)
+        }
+
+        clearForm()
         // Aquí iría la lógica para actualizar la reserva en el backend
         return true
     }
