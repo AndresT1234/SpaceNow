@@ -21,8 +21,6 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.app.spacenow.R
-import com.app.spacenow.data.model.Space
-import com.app.spacenow.data.model.Reservation
 import com.app.spacenow.ui.components.AdminReservationItem
 import com.app.spacenow.ui.components.ReservationItem
 import com.app.spacenow.ui.components.SpaceCard
@@ -31,7 +29,6 @@ import com.app.spacenow.ui.theme.AvailableGreen
 import com.app.spacenow.ui.viewmodels.AuthViewModel
 import com.app.spacenow.ui.viewmodels.DashboardViewModel
 import kotlinx.coroutines.launch
-import java.util.Date
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

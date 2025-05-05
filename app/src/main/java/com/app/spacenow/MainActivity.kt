@@ -4,11 +4,12 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
-import androidx.compose.material3.*
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.ui.Modifier
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -19,21 +20,23 @@ import com.app.spacenow.ui.theme.SpaceNowTheme
 import com.app.spacenow.ui.viewmodels.*
 
 class MainActivity : ComponentActivity() {
+
     private val authViewModel: AuthViewModel by viewModels()
     private val dashboardViewModel: DashboardViewModel by viewModels()
     private val reservationViewModel: ReservationViewModel by viewModels()
     private val spaceViewModel: SpaceViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
-
         super.onCreate(savedInstanceState)
+
+        // Permitir que reservationViewModel acceda a dashboardViewModel
         reservationViewModel.dashboardViewModel = dashboardViewModel
-        
+
         setContent {
-            val isAuthenticated by authViewModel.isAuthenticated.collectAsState()
             val navController = rememberNavController()
-            
-            // Collect states
+            val isAuthenticated by authViewModel.isAuthenticated.collectAsState()
+
+            // Collect additional state
             val spaces by dashboardViewModel.spaces.collectAsState()
             val reservations by dashboardViewModel.reservations.collectAsState()
             val isAdmin by dashboardViewModel.isAdmin.collectAsState()
@@ -50,15 +53,6 @@ class MainActivity : ComponentActivity() {
                         composable("auth") {
                             AuthScreen(
                                 navController = navController,
-                                authViewModel = authViewModel,
-
-                            )
-                        }
-
-                        composable("dashboard") {
-                            DashboardScreen(
-                                navController = navController,
-                                dashboardViewModel = dashboardViewModel,
                                 authViewModel = authViewModel
                             )
                         }
@@ -70,23 +64,30 @@ class MainActivity : ComponentActivity() {
                             )
                         }
 
+                        composable("dashboard") {
+                            DashboardScreen(
+                                navController = navController,
+                                dashboardViewModel = dashboardViewModel,
+                                authViewModel = authViewModel
+                            )
+                        }
+
                         composable("promote-users") {
                             PromoteUserScreen(
                                 authViewModel = authViewModel
                             )
                         }
 
-                        // Ruta unificada para formularios de espacios y reservas
                         composable(
                             route = "form?spaceId={spaceId}&reservationId={reservationId}&mode={mode}",
                             arguments = listOf(
-                                navArgument("spaceId") { 
+                                navArgument("spaceId") {
                                     type = NavType.StringType
-                                    nullable = true 
+                                    nullable = true
                                 },
-                                navArgument("reservationId") { 
+                                navArgument("reservationId") {
                                     type = NavType.StringType
-                                    nullable = true 
+                                    nullable = true
                                 },
                                 navArgument("mode") {
                                     type = NavType.StringType
@@ -97,11 +98,11 @@ class MainActivity : ComponentActivity() {
                             val spaceId = backStackEntry.arguments?.getString("spaceId")
                             val reservationId = backStackEntry.arguments?.getString("reservationId")
                             val mode = backStackEntry.arguments?.getString("mode") ?: "reservation"
-                            
+
                             val space = spaceId?.let { id ->
                                 spaces.find { it.id == id }
                             }
-                            
+
                             val reservation = reservationId?.let { id ->
                                 reservations.find { it.id == id }
                             }

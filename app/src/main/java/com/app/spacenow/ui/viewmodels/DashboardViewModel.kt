@@ -5,23 +5,21 @@ import androidx.lifecycle.viewModelScope
 import com.app.spacenow.R
 import com.app.spacenow.data.model.Space
 import com.app.spacenow.data.model.Reservation
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import java.util.Date
 
 class DashboardViewModel : ViewModel() {
-    val _spaces = MutableStateFlow<List<Space>>(emptyList())
+
+    private val _spaces = MutableStateFlow<List<Space>>(emptyList())
     val spaces: StateFlow<List<Space>> = _spaces.asStateFlow()
 
     private val _reservations = MutableStateFlow<List<Reservation>>(emptyList())
     val reservations: StateFlow<List<Reservation>> = _reservations.asStateFlow()
 
     private val _isLoading = MutableStateFlow(false)
-    val isLoading = _isLoading.asStateFlow()
+    val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
-    // User role state
     private val _isAdmin = MutableStateFlow(false)
     val isAdmin: StateFlow<Boolean> = _isAdmin.asStateFlow()
 
@@ -37,7 +35,7 @@ class DashboardViewModel : ViewModel() {
 
     init {
         viewModelScope.launch {
-            isAdmin.collect { isAdmin ->
+            _isAdmin.collect { isAdmin ->
                 if (isAdmin) {
                     loadAllActiveReservations()
                     calculateSpaceStatistics()
@@ -51,8 +49,7 @@ class DashboardViewModel : ViewModel() {
     fun updateAdminStatus(authViewModel: AuthViewModel) {
         viewModelScope.launch {
             authViewModel.userRole.collect { role ->
-                val isAdminValue = role == "admin"
-                _isAdmin.value = isAdminValue
+                _isAdmin.value = role == "admin"
             }
         }
     }
@@ -62,58 +59,15 @@ class DashboardViewModel : ViewModel() {
             _isLoading.value = true
             try {
                 val mockSpaces = listOf(
-                    Space(
-                        id = "1",
-                        name = "Salón Social",
-                        description = "Amplio espacio para eventos sociales y reuniones",
-                        capacity = 50,
-                        available = true,
-                        imageResource = R.drawable.salon_social
-                    ),
-                    Space(
-                        id = "2",
-                        name = "Zona BBQ",
-                        description = "Área equipada para asados y reuniones al aire libre",
-                        capacity = 20,
-                        available = true,
-                        imageResource = R.drawable.zona_bbq
-                    ),
-                    Space(
-                        id = "3",
-                        name = "Gimnasio",
-                        description = "Espacio con equipos modernos para ejercicio",
-                        capacity = 15,
-                        available = true,
-                        imageResource = R.drawable.gimnasio
-                    ),
-                    Space(
-                        id = "4",
-                        name = "Sauna",
-                        description = "Área de relajación y bienestar",
-                        capacity = 6,
-                        available = true,
-                        imageResource = R.drawable.sauna
-                    ),
-                    Space(
-                        id = "5",
-                        name = "Cancha de Tenis",
-                        description = "Cancha profesional para práctica y competición",
-                        capacity = 4,
-                        available = true,
-                        imageResource = R.drawable.cancha_tenis
-                    ),
-                    Space(
-                        id = "6",
-                        name = "Cancha Sintética",
-                        description = "Campo de fútbol con césped artificial",
-                        capacity = 14,
-                        available = true,
-                        imageResource = R.drawable.cancha_sintetica
-                    )
+                    Space("1", "Salón Social", "Amplio espacio para eventos sociales y reuniones", 50, true, R.drawable.salon_social),
+                    Space("2", "Zona BBQ", "Área equipada para asados y reuniones al aire libre", 20, true, R.drawable.zona_bbq),
+                    Space("3", "Gimnasio", "Espacio con equipos modernos para ejercicio", 15, true, R.drawable.gimnasio),
+                    Space("4", "Sauna", "Área de relajación y bienestar", 6, true, R.drawable.sauna),
+                    Space("5", "Cancha de Tenis", "Cancha profesional para práctica y competición", 4, true, R.drawable.cancha_tenis),
+                    Space("6", "Cancha Sintética", "Campo de fútbol con césped artificial", 14, true, R.drawable.cancha_sintetica)
                 )
                 _spaces.value = mockSpaces
             } catch (e: Exception) {
-                // Manejar el error si es necesario
                 _spaces.value = emptyList()
             } finally {
                 _isLoading.value = false
@@ -124,20 +78,8 @@ class DashboardViewModel : ViewModel() {
     private fun loadMockReservations() {
         viewModelScope.launch {
             val mockReservations = listOf(
-                Reservation(
-                    id = "1",
-                    spaceId = "1",
-                    spaceName = "Salón Social",
-                    userId = "current_user",
-                    dateTime = Date(System.currentTimeMillis() + 86400000) // Mañana
-                ),
-                Reservation(
-                    id = "2",
-                    spaceId = "2",
-                    spaceName = "Zona BBQ",
-                    userId = "current_user",
-                    dateTime = Date(System.currentTimeMillis() + 172800000) // Pasado mañana
-                )
+                Reservation("1", "1", "Salón Social", "current_user", Date(System.currentTimeMillis() + 86400000)),
+                Reservation("2", "2", "Zona BBQ", "current_user", Date(System.currentTimeMillis() + 172800000))
             )
             _reservations.value = mockReservations
         }
@@ -146,20 +88,8 @@ class DashboardViewModel : ViewModel() {
     private fun loadAllActiveReservations() {
         viewModelScope.launch {
             val mockAllReservations = listOf(
-                Reservation(
-                    id = "3",
-                    spaceId = "3",
-                    spaceName = "Gimnasio",
-                    userId = "other_user1",
-                    dateTime = Date(System.currentTimeMillis() + 86400000)
-                ),
-                Reservation(
-                    id = "4",
-                    spaceId = "1",
-                    spaceName = "Salón Social",
-                    userId = "other_user2",
-                    dateTime = Date(System.currentTimeMillis() + 172800000)
-                )
+                Reservation("3", "3", "Gimnasio", "other_user1", Date(System.currentTimeMillis() + 86400000)),
+                Reservation("4", "1", "Salón Social", "other_user2", Date(System.currentTimeMillis() + 172800000))
             )
             _allActiveReservations.value = mockAllReservations
         }
@@ -176,34 +106,34 @@ class DashboardViewModel : ViewModel() {
     }
 
     fun deleteReservation(reservationId: String) {
-        val currentReservations = _reservations.value.toMutableList()
-        currentReservations.removeIf { it.id == reservationId }
-        _reservations.value = currentReservations
+        val updatedList = _reservations.value.toMutableList().apply {
+            removeIf { it.id == reservationId }
+        }
+        _reservations.value = updatedList
     }
 
     fun modifyReservation(reservationId: String, newDateTime: Date) {
-        val currentReservations = _reservations.value.toMutableList()
-        val index = currentReservations.indexOfFirst { it.id == reservationId }
+        val updatedList = _reservations.value.toMutableList()
+        val index = updatedList.indexOfFirst { it.id == reservationId }
         if (index != -1) {
-            val reservation = currentReservations[index]
-            currentReservations[index] = reservation.copy(dateTime = newDateTime)
-            _reservations.value = currentReservations
+            updatedList[index] = updatedList[index].copy(dateTime = newDateTime)
+            _reservations.value = updatedList
         }
     }
 
     fun addReservation(reservation: Reservation) {
-        val currentReservations = _reservations.value.toMutableList()
-        currentReservations.add(reservation)
-        _reservations.value = currentReservations
+        val updatedList = _reservations.value.toMutableList().apply {
+            add(reservation)
+        }
+        _reservations.value = updatedList
 
-        // Actualizar estadísticas si es admin
-        if (isAdmin.value) {
+        if (_isAdmin.value) {
             calculateSpaceStatistics()
         }
     }
 
     override fun onCleared() {
         super.onCleared()
-        // Clean up any resources if needed
+        // Limpiar recursos si es necesario
     }
 }
