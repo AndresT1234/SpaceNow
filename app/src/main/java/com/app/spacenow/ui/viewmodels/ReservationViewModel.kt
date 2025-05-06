@@ -43,6 +43,11 @@ class ReservationViewModel : ViewModel() {
             return false
         }
 
+        if (date.before(Date())) {
+            _errorMessage.value = "La fecha seleccionada no puede ser anterior a la fecha actual"
+            return false
+        }
+
         val reservation = Reservation(
             id = System.currentTimeMillis().toString(),
             spaceId = space.id,

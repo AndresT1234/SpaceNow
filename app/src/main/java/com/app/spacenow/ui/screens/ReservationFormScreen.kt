@@ -184,7 +184,7 @@ private fun DateTimeSelector(
     val dateFormatter = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
     val calendar = Calendar.getInstance()
     selectedDate?.let { calendar.time = it }
-    
+
     OutlinedCard(
         modifier = Modifier.fillMaxWidth(),
         onClick = {
@@ -194,7 +194,7 @@ private fun DateTimeSelector(
                     calendar.set(Calendar.YEAR, year)
                     calendar.set(Calendar.MONTH, month)
                     calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth)
-                    
+
                     TimePickerDialog(
                         context,
                         { _, hourOfDay, minute ->
@@ -210,7 +210,9 @@ private fun DateTimeSelector(
                 calendar.get(Calendar.YEAR),
                 calendar.get(Calendar.MONTH),
                 calendar.get(Calendar.DAY_OF_MONTH)
-            ).show()
+            ).apply {
+                datePicker.minDate = System.currentTimeMillis()
+            }.show()
         }
     ) {
         Row(

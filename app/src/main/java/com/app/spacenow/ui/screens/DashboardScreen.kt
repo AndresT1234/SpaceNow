@@ -220,18 +220,7 @@ fun DashboardScreen(
                     }
                 )
             },
-            // Boton flotante de acción (FAB) para agregar reservas
-            /* 
-            floatingActionButton = {
-                if (!isAdmin) {
-                    FloatingActionButton(
-                        onClick = { navController.navigate("form?mode=reservation") }
-                    ) {
-                        Icon(Icons.Default.Add, contentDescription = "Nueva Reserva")
-                    }
-                }
-            }
-            */
+
         ) { padding ->
             LazyColumn(
                 state = listState,
@@ -273,11 +262,6 @@ fun DashboardScreen(
                                 .onGloballyPositioned { spacesRef.value = 0 }
                         )
                     }
-
-
-
-
-
                     items(spaces) { space ->
                         Card(
                             modifier = Modifier

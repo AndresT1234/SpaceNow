@@ -59,10 +59,10 @@ class DashboardViewModel : ViewModel() {
             _isLoading.value = true
             try {
                 val mockSpaces = listOf(
-                    Space("1", "Salón Social", "Amplio espacio para eventos sociales y reuniones", 50, true, R.drawable.salon_social),
+                    Space("1", "Salón Social", "Amplio espacio para eventos sociales", 50, true, R.drawable.salon_social),
                     Space("2", "Zona BBQ", "Área equipada para asados y reuniones al aire libre", 20, true, R.drawable.zona_bbq),
                     Space("3", "Gimnasio", "Espacio con equipos modernos para ejercicio", 15, true, R.drawable.gimnasio),
-                    Space("4", "Sauna", "Área de relajación y bienestar", 6, true, R.drawable.sauna),
+                    Space("4", "Sauna", "Área tranquila para relajación  bienestar ", 6, true, R.drawable.sauna),
                     Space("5", "Cancha de Tenis", "Cancha profesional para práctica y competición", 4, true, R.drawable.cancha_tenis),
                     Space("6", "Cancha Sintética", "Campo de fútbol con césped artificial", 14, true, R.drawable.cancha_sintetica)
                 )
