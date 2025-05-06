@@ -29,6 +29,7 @@ import com.app.spacenow.ui.theme.AvailableGreen
 import com.app.spacenow.ui.viewmodels.AuthViewModel
 import com.app.spacenow.ui.viewmodels.DashboardViewModel
 import kotlinx.coroutines.launch
+import androidx.compose.ui.text.style.TextAlign
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -157,7 +158,15 @@ fun DashboardScreen(
                 Spacer(Modifier.weight(1f))
 
                 NavigationDrawerItem(
-                    label = { Text("Cerrar sesión") },
+                    label = { Text(
+                        "Cerrar sesión",
+                        modifier = Modifier.fillMaxWidth(),
+                        style = MaterialTheme.typography.bodyLarge.copy(
+                                textAlign = TextAlign.Center,
+                                fontWeight = FontWeight.Bold
+                            )
+                        ) 
+                    },
                     selected = false,
                     colors = NavigationDrawerItemDefaults.colors(
                         unselectedIconColor = MaterialTheme.colorScheme.error,
@@ -165,7 +174,7 @@ fun DashboardScreen(
                     ),
                     onClick = { showLogoutDialog = true }
                 )
-
+            
                 if (showLogoutDialog) {
                     AlertDialog(
                         onDismissRequest = { showLogoutDialog = false },
