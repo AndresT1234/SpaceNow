@@ -220,6 +220,8 @@ fun DashboardScreen(
                     }
                 )
             },
+            // Boton flotante de acción (FAB) para agregar reservas
+            /* 
             floatingActionButton = {
                 if (!isAdmin) {
                     FloatingActionButton(
@@ -229,6 +231,7 @@ fun DashboardScreen(
                     }
                 }
             }
+            */
         ) { padding ->
             LazyColumn(
                 state = listState,
