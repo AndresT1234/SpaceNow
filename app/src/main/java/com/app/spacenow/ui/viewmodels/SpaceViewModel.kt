@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import com.app.spacenow.R
 
 class SpaceViewModel : ViewModel() {
     private val _selectedSpace = MutableStateFlow<Space?>(null)
@@ -19,9 +20,8 @@ class SpaceViewModel : ViewModel() {
     private val _errorMessage = MutableStateFlow<String?>(null)
     val errorMessage: StateFlow<String?> = _errorMessage.asStateFlow()
 
-
-    private val _spaces = MutableStateFlow<List<Space>>(emptyList())
-    val spaces: StateFlow<List<Space>> = _spaces.asStateFlow()
+    // Reference to DashboardViewModel
+    var dashboardViewModel: DashboardViewModel? = null
 
     fun setSelectedSpace(space: Space) {
         _selectedSpace.value = space
@@ -36,11 +36,16 @@ class SpaceViewModel : ViewModel() {
         try {
             _isLoading.value = true
 
-            val imageResource = imageUri?.let { 0 } ?: 0
+            // Handle image processing if needed
+            val imageResource = imageUri?.let {
+                // In a real app, process and upload the image
+                // For now, just use a placeholder image resource
+                R.drawable.salon_social // Default image or placeholder
+            } ?: R.drawable.salon_social // Default image if none selected
 
             // Create the space object
             val space = Space(
-                id = System.currentTimeMillis().toString(), // Temporary ID, should come from backend
+                id = System.currentTimeMillis().toString(),
                 name = name,
                 description = description,
                 capacity = capacity,
@@ -48,10 +53,8 @@ class SpaceViewModel : ViewModel() {
                 imageResource = imageResource
             )
 
-
-            val currentSpaces = _spaces.value.toMutableList()
-            currentSpaces.add(space)
-            _spaces.value = currentSpaces
+            // Add the new space to the DashboardViewModel
+            dashboardViewModel?.addSpace(space)
 
             return true
         } catch (e: Exception) {
@@ -73,13 +76,14 @@ class SpaceViewModel : ViewModel() {
 
             // Handle image update if provided
             val imageResource = if (imageUri != null) {
-
-                0
+                // Process new image
+                R.drawable.salon_social // Replace with actual image processing
             } else {
+                // Keep existing image
                 space.imageResource
             }
 
-            // Create updated space with new details
+            // Create updated space
             val updatedSpace = space.copy(
                 name = name,
                 description = description,
@@ -87,12 +91,8 @@ class SpaceViewModel : ViewModel() {
                 imageResource = imageResource
             )
 
-            val currentSpaces = _spaces.value.toMutableList()
-            val index = currentSpaces.indexOfFirst { it.id == space.id }
-            if (index != -1) {
-                currentSpaces[index] = updatedSpace
-                _spaces.value = currentSpaces
-            }
+            // Update the space in DashboardViewModel
+            dashboardViewModel?.updateSpace(updatedSpace)
 
             return true
         } catch (e: Exception) {
@@ -107,9 +107,8 @@ class SpaceViewModel : ViewModel() {
         try {
             _isLoading.value = true
 
-            val currentSpaces = _spaces.value.toMutableList()
-            currentSpaces.removeIf { it.id == spaceId }
-            _spaces.value = currentSpaces
+            // Delete from DashboardViewModel
+            dashboardViewModel?.deleteSpace(spaceId)
 
             return true
         } catch (e: Exception) {

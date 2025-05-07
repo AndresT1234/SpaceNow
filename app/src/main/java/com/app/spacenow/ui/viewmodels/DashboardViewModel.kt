@@ -46,6 +46,27 @@ class DashboardViewModel : ViewModel() {
         //loadMockReservations() //Carga reservas de manera predeterminada
     }
 
+    fun addSpace(space: Space) {
+        val currentSpaces = _spaces.value.toMutableList()
+        currentSpaces.add(space)
+        _spaces.value = currentSpaces
+    }
+
+    fun updateSpace(updatedSpace: Space) {
+        val currentSpaces = _spaces.value.toMutableList()
+        val index = currentSpaces.indexOfFirst { it.id == updatedSpace.id }
+        if (index != -1) {
+            currentSpaces[index] = updatedSpace
+            _spaces.value = currentSpaces
+        }
+    }
+
+    fun deleteSpace(spaceId: String) {
+        val currentSpaces = _spaces.value.toMutableList()
+        currentSpaces.removeIf { it.id == spaceId }
+        _spaces.value = currentSpaces
+    }
+
     fun updateAdminStatus(authViewModel: AuthViewModel) {
         viewModelScope.launch {
             authViewModel.userRole.collect { role ->

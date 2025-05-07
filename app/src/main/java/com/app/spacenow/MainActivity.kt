@@ -31,6 +31,7 @@ class MainActivity : ComponentActivity() {
 
         // Permitir que reservationViewModel acceda a dashboardViewModel
         reservationViewModel.dashboardViewModel = dashboardViewModel
+        spaceViewModel.dashboardViewModel = dashboardViewModel
 
         setContent {
             val navController = rememberNavController()
