@@ -1,14 +1,18 @@
 package com.app.spacenow.ui.viewmodels
 
+import android.content.Context
 import android.net.Uri
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.app.spacenow.R
 import com.app.spacenow.data.model.Space
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import com.app.spacenow.R
+import java.util.UUID
+import com.app.spacenow.ui.utils.*
 
 class SpaceViewModel : ViewModel() {
     private val _selectedSpace = MutableStateFlow<Space?>(null)
@@ -23,11 +27,19 @@ class SpaceViewModel : ViewModel() {
     // Reference to DashboardViewModel
     var dashboardViewModel: DashboardViewModel? = null
 
+    // Necesitamos una referencia al contexto para manejar URIs y archivos
+    private var appContext: Context? = null
+
+    // Método para establecer el contexto (llamar desde la inicialización)
+    fun setContext(context: Context) {
+        this.appContext = context.applicationContext
+    }
+
     fun setSelectedSpace(space: Space) {
         _selectedSpace.value = space
     }
 
-    fun createSpace(name: String, description: String, capacity: Int, imageUri: Uri? = null): Boolean {
+    fun createSpace(name: String, description: String, capacity: Int, tempImageUri: Uri?): Boolean {
         if (name.isBlank() || description.isBlank() || capacity <= 0) {
             _errorMessage.value = "Por favor complete todos los campos correctamente"
             return false
@@ -36,28 +48,35 @@ class SpaceViewModel : ViewModel() {
         try {
             _isLoading.value = true
 
-            // Handle image processing if needed
-            val imageResource = imageUri?.let {
-                // In a real app, process and upload the image
-                // For now, just use a placeholder image resource
-                R.drawable.salon_social // Default image or placeholder
-            } ?: R.drawable.salon_social // Default image if none selected
+            // Verificar que tenemos contexto
+            if (appContext == null) {
+                _errorMessage.value = "Error: Contexto de la aplicación no disponible"
+                return false
+            }
 
-            // Create the space object
+            // Guardar la imagen de forma permanente
+            val permanentImageUri = saveImageToAppStorage(appContext!!, tempImageUri)
+
+            Log.d("SpaceViewModel", "Creando espacio con URI: $tempImageUri")
+            Log.d("SpaceViewModel", "URI permanente: $permanentImageUri")
+
+            // Crear el objeto space con la URI permanente
             val space = Space(
-                id = System.currentTimeMillis().toString(),
+                id = UUID.randomUUID().toString(),
                 name = name,
                 description = description,
                 capacity = capacity,
                 available = true,
-                imageResource = imageResource
+                imageResource = R.drawable.salon_social, // Imagen por defecto como fallback
+                imageUri = permanentImageUri?.toString() // URI permanente para la imagen
             )
 
-            // Add the new space to the DashboardViewModel
+            // Añadir el nuevo espacio al DashboardViewModel
             dashboardViewModel?.addSpace(space)
 
             return true
         } catch (e: Exception) {
+            Log.e("SpaceViewModel", "Error al crear espacio", e)
             _errorMessage.value = "Error al crear el espacio: ${e.message}"
             return false
         } finally {
@@ -65,7 +84,7 @@ class SpaceViewModel : ViewModel() {
         }
     }
 
-    fun updateSpace(space: Space, name: String, description: String, capacity: Int, imageUri: Uri? = null): Boolean {
+    fun updateSpace(space: Space, name: String, description: String, capacity: Int, tempImageUri: Uri? = null): Boolean {
         if (name.isBlank() || description.isBlank() || capacity <= 0) {
             _errorMessage.value = "Por favor complete todos los campos correctamente"
             return false
@@ -74,28 +93,35 @@ class SpaceViewModel : ViewModel() {
         try {
             _isLoading.value = true
 
-            // Handle image update if provided
-            val imageResource = if (imageUri != null) {
-                // Process new image
-                R.drawable.salon_social // Replace with actual image processing
-            } else {
-                // Keep existing image
-                space.imageResource
+            // Verificar que tenemos contexto
+            if (appContext == null) {
+                _errorMessage.value = "Error: Contexto de la aplicación no disponible"
+                return false
             }
 
-            // Create updated space
+            // Procesar la imagen solo si se proporciona una nueva
+            val permanentImageUri = if (tempImageUri != null) {
+                saveImageToAppStorage(appContext!!, tempImageUri)
+            } else {
+                // Mantener la URI existente
+                space.imageUri?.let { Uri.parse(it) }
+            }
+
+            // Crear el espacio actualizado
             val updatedSpace = space.copy(
                 name = name,
                 description = description,
                 capacity = capacity,
-                imageResource = imageResource
+                imageResource = space.imageResource,
+                imageUri = permanentImageUri?.toString() ?: space.imageUri
             )
 
-            // Update the space in DashboardViewModel
+            // Actualizar el espacio en DashboardViewModel
             dashboardViewModel?.updateSpace(updatedSpace)
 
             return true
         } catch (e: Exception) {
+            Log.e("SpaceViewModel", "Error al actualizar espacio", e)
             _errorMessage.value = "Error al actualizar el espacio: ${e.message}"
             return false
         } finally {
@@ -107,7 +133,7 @@ class SpaceViewModel : ViewModel() {
         try {
             _isLoading.value = true
 
-            // Delete from DashboardViewModel
+            // Eliminar del DashboardViewModel
             dashboardViewModel?.deleteSpace(spaceId)
 
             return true
