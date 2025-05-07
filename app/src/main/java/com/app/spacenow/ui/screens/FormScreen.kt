@@ -1,29 +1,46 @@
 package com.app.spacenow.ui.screens
 
+// Android imports
+import android.app.TimePickerDialog
+import android.app.DatePickerDialog as AndroidDatePickerDialog
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+
+// Compose imports
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+
+// Project imports
 import com.app.spacenow.data.model.Reservation
 import com.app.spacenow.data.model.Space
 import com.app.spacenow.ui.components.PrimaryButton
-import com.app.spacenow.ui.components.TextFieldInput
 import com.app.spacenow.ui.viewmodels.ReservationViewModel
 import com.app.spacenow.ui.viewmodels.SpaceViewModel
+import coil.compose.AsyncImage
 import java.text.SimpleDateFormat
 import java.util.*
-import android.app.TimePickerDialog
-import android.app.DatePickerDialog as AndroidDatePickerDialog
 
+/**
+ * Form screen for creating or editing spaces and reservations
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FormScreen(
@@ -32,31 +49,33 @@ fun FormScreen(
     space: Space? = null,
     existingReservation: Reservation? = null,
     reservationViewModel: ReservationViewModel = viewModel(),
-    spaceViewModel: SpaceViewModel = viewModel()
+    spaceViewModel: SpaceViewModel = viewModel(),
+    spaces: List<Space>,
 ) {
-    // Estados para el formulario
+    // Form state
     var name by remember { mutableStateOf(space?.name ?: "") }
     var description by remember { mutableStateOf(space?.description ?: "") }
     var capacity by remember { mutableStateOf(space?.capacity?.toString() ?: "") }
     var showSpaceDropdown by remember { mutableStateOf(false) }
+    var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
     val context = LocalContext.current
 
-    // Estados del ViewModel según el modo
+    // ViewModel state
     val selectedDate by reservationViewModel.selectedDate.collectAsState()
     val selectedSpace by reservationViewModel.selectedSpace.collectAsState()
     val errorMessage by if (isAdmin) spaceViewModel.errorMessage.collectAsState() else reservationViewModel.errorMessage.collectAsState()
 
-    // Inicializar datos si es una edición
+    // Initialize data if editing
     LaunchedEffect(space, existingReservation) {
         if (isAdmin) {
-            space?.let { 
+            space?.let {
                 name = it.name
                 description = it.description
                 capacity = it.capacity.toString()
             }
         } else {
             space?.let { reservationViewModel.setSelectedSpace(it) }
-            existingReservation?.let { 
+            existingReservation?.let {
                 reservationViewModel.setSelectedSpace(Space(
                     id = it.spaceId,
                     name = it.spaceName,
@@ -73,7 +92,7 @@ fun FormScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { 
+                title = {
                     Text(
                         when {
                             isAdmin && space != null -> "Editar Espacio"
@@ -90,7 +109,7 @@ fun FormScreen(
                 }
             )
         }
-    ) { padding -> 
+    ) { padding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -99,7 +118,7 @@ fun FormScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             if (isAdmin) {
-                // Formulario de Espacio
+                // Space form fields
                 OutlinedTextField(
                     value = name,
                     onValueChange = { name = it },
@@ -123,8 +142,16 @@ fun FormScreen(
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     modifier = Modifier.fillMaxWidth()
                 )
+
+                // Image picker component
+                ImagePickerSection(
+                    selectedImageUri = selectedImageUri,
+                    onImageSelected = { uri ->
+                        selectedImageUri = uri
+                    }
+                )
             } else {
-                // Formulario de Reserva
+                // Reservation form fields
                 Text(
                     text = "¿Qué espacio quieres reservar?",
                     style = MaterialTheme.typography.titleMedium
@@ -136,7 +163,8 @@ fun FormScreen(
                         onSpaceSelected = { reservationViewModel.setSelectedSpace(it) },
                         showDropdown = showSpaceDropdown,
                         onDropdownDismiss = { showSpaceDropdown = false },
-                        onDropdownShow = { showSpaceDropdown = true }
+                        onDropdownShow = { showSpaceDropdown = true },
+                        spaces = spaces
                     )
                 } else {
                     Text(
@@ -159,24 +187,27 @@ fun FormScreen(
                 )
             }
 
-            // Mostrar error si existe
+            // Error message
             errorMessage?.let { error ->
                 Text(
                     text = error,
                     color = MaterialTheme.colorScheme.error,
-                    style = MaterialTheme.typography.bodyMedium
+                    style = MaterialTheme.typography.bodyMedium,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp)
                 )
             }
 
             Spacer(modifier = Modifier.weight(1f))
 
-            // Botones de acción
+            // Action buttons
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 if (space != null && isAdmin) {
-                    // Botón eliminar para espacios existentes
                     Button(
                         onClick = {
                             if (spaceViewModel.deleteSpace(space.id)) {
@@ -207,14 +238,16 @@ fun FormScreen(
                                     space,
                                     name,
                                     description,
-                                    capacity.toIntOrNull() ?: 0
+                                    capacity.toIntOrNull() ?: 0,
+                                    selectedImageUri
                                 )
                             }
                             isAdmin -> {
                                 spaceViewModel.createSpace(
                                     name,
                                     description,
-                                    capacity.toIntOrNull() ?: 0
+                                    capacity.toIntOrNull() ?: 0,
+                                    selectedImageUri
                                 )
                             }
                             existingReservation != null -> {
@@ -234,6 +267,87 @@ fun FormScreen(
     }
 }
 
+/**
+ * Component for selecting and previewing an image
+ */
+@Composable
+fun ImagePickerSection(
+    selectedImageUri: Uri?,
+    onImageSelected: (Uri?) -> Unit
+) {
+    val context = LocalContext.current
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        onImageSelected(uri)
+    }
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = "Imagen del espacio",
+            style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier.padding(bottom = 8.dp)
+        )
+
+        // Image preview
+        Box(
+            modifier = Modifier
+                .size(200.dp)
+                .border(
+                    width = 1.dp,
+                    color = MaterialTheme.colorScheme.outline,
+                    shape = RoundedCornerShape(8.dp)
+                )
+                .clip(RoundedCornerShape(8.dp))
+                .background(MaterialTheme.colorScheme.surfaceVariant),
+            contentAlignment = Alignment.Center
+        ) {
+            if (selectedImageUri != null) {
+                // Show selected image
+                AsyncImage(
+                    model = selectedImageUri,
+                    contentDescription = "Selected image",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize()
+                )
+            } else {
+                // Show placeholder
+                Icon(
+                    imageVector = Icons.Default.Image,
+                    contentDescription = "No image selected",
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.size(64.dp)
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        // Button to open image picker
+        Button(
+            onClick = { launcher.launch("image/*") }
+        ) {
+            Icon(
+                imageVector = Icons.Default.Add,
+                contentDescription = null,
+                modifier = Modifier.size(ButtonDefaults.IconSize)
+            )
+            Spacer(modifier = Modifier.width(ButtonDefaults.IconSpacing))
+            Text(
+                text = if (selectedImageUri == null) "Seleccionar imagen" else "Cambiar imagen"
+            )
+        }
+    }
+}
+
+/**
+ * Dropdown menu for selecting a space
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun SpaceSelector(
@@ -241,7 +355,8 @@ private fun SpaceSelector(
     onSpaceSelected: (Space) -> Unit,
     showDropdown: Boolean,
     onDropdownDismiss: () -> Unit,
-    onDropdownShow: () -> Unit
+    onDropdownShow: () -> Unit,
+    spaces: List<Space>
 ) {
     ExposedDropdownMenuBox(
         expanded = showDropdown,
@@ -264,12 +379,7 @@ private fun SpaceSelector(
             expanded = showDropdown,
             onDismissRequest = onDropdownDismiss
         ) {
-            // TODO: Reemplazar con lista real de espacios
-            listOf(
-                Space("1", "Salón Social", "Desc", 50, true, 0),
-                Space("2", "Zona BBQ", "Desc", 20, true, 0),
-                Space("3", "Gimnasio", "Desc", 15, true, 0)
-            ).forEach { space ->
+            spaces.forEach { space ->
                 DropdownMenuItem(
                     text = { Text(space.name) },
                     onClick = {
@@ -282,6 +392,9 @@ private fun SpaceSelector(
     }
 }
 
+/**
+ * Component for selecting date and time
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun DateTimeSelector(
@@ -292,7 +405,7 @@ private fun DateTimeSelector(
     val dateFormatter = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
     val calendar = Calendar.getInstance()
     selectedDate?.let { calendar.time = it }
-    
+
     OutlinedCard(
         modifier = Modifier.fillMaxWidth(),
         onClick = {
@@ -302,7 +415,7 @@ private fun DateTimeSelector(
                     calendar.set(Calendar.YEAR, year)
                     calendar.set(Calendar.MONTH, month)
                     calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth)
-                    
+
                     TimePickerDialog(
                         context,
                         { _, hourOfDay, minute ->
