@@ -6,6 +6,7 @@ import android.app.DatePickerDialog as AndroidDatePickerDialog
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import android.util.Log
 
 // Compose imports
 import androidx.compose.foundation.background
@@ -58,12 +59,20 @@ fun FormScreen(
     var capacity by remember { mutableStateOf(space?.capacity?.toString() ?: "") }
     var showSpaceDropdown by remember { mutableStateOf(false) }
     var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
-    val context = LocalContext.current
+
 
     // ViewModel state
     val selectedDate by reservationViewModel.selectedDate.collectAsState()
     val selectedSpace by reservationViewModel.selectedSpace.collectAsState()
     val errorMessage by if (isAdmin) spaceViewModel.errorMessage.collectAsState() else reservationViewModel.errorMessage.collectAsState()
+
+    // Obtener el contexto actual
+    val context = LocalContext.current
+
+    // Establecer el contexto en el ViewModel
+    LaunchedEffect(key1 = Unit) {
+        spaceViewModel.setContext(context)
+    }
 
     // Initialize data if editing
     LaunchedEffect(space, existingReservation) {
@@ -147,7 +156,13 @@ fun FormScreen(
                 ImagePickerSection(
                     selectedImageUri = selectedImageUri,
                     onImageSelected = { uri ->
+
                         selectedImageUri = uri
+
+
+                        uri?.let {
+                            Log.d("ImagePicker", "URI seleccionada: $it")
+                        }
                     }
                 )
             } else {
@@ -279,6 +294,7 @@ fun ImagePickerSection(
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
+        Log.d("ImagePicker", "URI recibida del selector: $uri")
         onImageSelected(uri)
     }
 
@@ -313,7 +329,10 @@ fun ImagePickerSection(
                     model = selectedImageUri,
                     contentDescription = "Selected image",
                     contentScale = ContentScale.Crop,
-                    modifier = Modifier.fillMaxSize()
+                    modifier = Modifier.fillMaxSize(),
+                    onError = {
+                        Log.e("ImagePicker", "Error cargando imagen: ${it.result.throwable.message}")
+                    }
                 )
             } else {
                 // Show placeholder

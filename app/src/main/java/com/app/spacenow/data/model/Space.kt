@@ -1,10 +1,11 @@
 package com.app.spacenow.data.model
 
 data class Space(
-    val id: String = "",
-    val name: String = "",
-    val description: String = "",
-    val capacity: Int = 0,
-    val available: Boolean = true,
-    val imageResource: Int = 0
+    val id: String,
+    val name: String,
+    val description: String,
+    val capacity: Int,
+    val available: Boolean,
+    val imageResource: Int,
+    val imageUri: String? = null
 )
