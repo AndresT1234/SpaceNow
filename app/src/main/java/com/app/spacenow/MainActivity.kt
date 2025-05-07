@@ -99,6 +99,8 @@ class MainActivity : ComponentActivity() {
                             val reservationId = backStackEntry.arguments?.getString("reservationId")
                             val mode = backStackEntry.arguments?.getString("mode") ?: "reservation"
 
+                            val spaces by dashboardViewModel.spaces.collectAsState()
+
                             val space = spaceId?.let { id ->
                                 spaces.find { it.id == id }
                             }
@@ -113,7 +115,8 @@ class MainActivity : ComponentActivity() {
                                 space = space,
                                 existingReservation = reservation,
                                 reservationViewModel = reservationViewModel,
-                                spaceViewModel = spaceViewModel
+                                spaceViewModel = spaceViewModel,
+                                spaces = spaces
                             )
                         }
                     }
