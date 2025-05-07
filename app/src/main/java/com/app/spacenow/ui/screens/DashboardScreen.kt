@@ -1,5 +1,6 @@
 package com.app.spacenow.ui.screens
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -204,8 +205,8 @@ fun DashboardScreen(
                 TopAppBar(
                     title = {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
-                                painter = painterResource(R.drawable.ic_logo),
+                            Image(
+                                painter = painterResource(id = R.drawable.logo_head),
                                 contentDescription = null,
                                 modifier = Modifier.size(32.dp)
                             )
